@@ -185,7 +185,7 @@ depthToWorldColorKernel(const uint16 *in, const float *trMat ,SWorldPoint *out,c
 }
 
 
-void dtmGpu( uchar* h_in, uchar* h_out, const int rows, const int cols, const int minDist, const int maxDist)
+float dtmGpu( uchar* h_in, uchar* h_out, const int rows, const int cols, const int minDist, const int maxDist)
 {
 	const int SIZE = rows * cols * sizeof(uint16);
 	cudaEvent_t start, stop;
@@ -224,7 +224,10 @@ void dtmGpu( uchar* h_in, uchar* h_out, const int rows, const int cols, const in
 	float msec = 0.f;
 	checkCudaErrors( cudaEventElapsedTime(&msec, start, stop) );
 
-	//printf("This took us %fl", msec);
+//#ifdef __CPU_VERSION__
+	//printf("the gpu version takes %fl\n", msec);
+//#endif
+	return msec;
 }
 
 void dtmGpuColor( uchar* h_in, uchar* h_inCol,uchar* h_out, const int rows, const int cols, const int minDist, const int maxDist)

@@ -12,6 +12,7 @@
 #include "math.h"
 #include "dtm.h"
 
+#define __CPU_VERSION__
 
 using namespace cv;
 using namespace std;
@@ -101,10 +102,17 @@ class MyFreenectDevice : public Freenect::FreenectDevice {
 		
 		bool getDepth(Mat& output) {
 				Mat dtmMat(Size(640,480),CV_16UC1);
+				float ms1,ms2;
 				m_depth_mutex.lock();
 				if(m_new_depth_frame) {
-			
+#ifdef __CPU_VERSION__
+					ms1 = dtmCpu(reinterpret_cast<uint16*>(depthMat.data),reinterpret_cast<uint16*>(dtmMat.data),1,2);
+					printf("The Cpu version took me %f millisecond\n", ms1);
+					ms2 = dtmGpu(depthMat.data,dtmMat.data,KINECT_ROWS,KINECT_COLS,1,2);
+					printf("the Gpu version took me millisecond %fl\n", ms2);
+#else
 					dtmGpu(depthMat.data,dtmMat.data,KINECT_ROWS,KINECT_COLS,1,2);
+#endif
 					dtmMat.convertTo(output,CV_8UC1, 255.0/2048.0);
 					m_new_depth_frame = false;
 					m_depth_mutex.unlock();
@@ -142,7 +150,7 @@ class MyFreenectDevice : public Freenect::FreenectDevice {
 						m_depth_mutex.lock();
 						if(m_new_depth_frame) {
 
-							depthToWorldColorKernel(depthMat.data,final , dtmMat.data,KINECT_ROWS,KINECT_COLS,1,2);
+							depthToRgbWorldPoint(depthMat.data,reinterpret_cast<float*>(final.data) , dtmMat.data,KINECT_ROWS,KINECT_COLS,1,2);
 							dtmMat.convertTo(output,CV_8UC1, 255.0/2048.0);
 							m_new_depth_frame = false;
 							m_depth_mutex.unlock();
@@ -152,6 +160,40 @@ class MyFreenectDevice : public Freenect::FreenectDevice {
 							return false;
 						}
 					}
+		float dtmCpu(uint16* inMat, uint16* outMat, uchar minRange, uchar maxRange)
+		{
+			clock_t start,end;
+			double miliseconds(0);
+			start = clock();
+
+			//uint16** inMat = reinterpret_cast<uint16**>(inImg);
+			//uint16** outMat = reinterpret_cast<uint16**>(outImg);
+
+			for (uint16 rows(0); rows < KINECT_ROWS; ++rows)
+			{
+				for (uint16 cols(0); cols < KINECT_COLS; ++cols)
+				{
+					uint32 index(rows*KINECT_COLS + cols);
+					if (inMat[index] < 2047)
+					{
+						float tmp  = static_cast<float>(1.0 / static_cast<double>(inMat[index]*-0.0030711016 + 3.330949516));
+
+						if ((tmp >= minRange) && (tmp <= maxRange))
+						{
+							outMat[index] = static_cast<uint16>(tmp);
+						}
+						else
+						{
+							outMat[index] = 0;
+						}
+					}
+				}
+			}
+
+			end = clock();
+			miliseconds = (float)((((float)end - (float)start) / 1000000.f)*1000.f);
+			return miliseconds;
+		}
 
 		bool getColorDist(Mat& output) {
 				Mat dtmMat(Size(640,480),CV_8UC3);
