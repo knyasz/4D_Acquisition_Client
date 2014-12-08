@@ -128,6 +128,7 @@ public:
 			}
 			
 			//printf("the Gpu version took me millisecond %fl\n", ms2);
+
 #else
 			dtmGpu(depthMat.data,dtmMat.data,KINECT_ROWS,KINECT_COLS,1,2);
 #endif
