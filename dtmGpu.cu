@@ -64,7 +64,7 @@ transformByPoint(SWorldPoint*** inPoints, const float* trMat, SWorldPoint*** tra
 }
 
 __global__ void
-dtmKernel(const uint16 *in, uint16 *out,const int minDist, const int maxDist,const int cols, const int rows)
+dtmKernel(const uint16 *in, uint16 *out,const float minDist, const float maxDist,const int cols, const int rows)
 {
 	__shared__  float sharedIn[N][N];
 	__shared__  float sharedTmp[N][N];
@@ -100,7 +100,7 @@ dtmKernel(const uint16 *in, uint16 *out,const int minDist, const int maxDist,con
 
 
 __global__ void
-dtmKernelColor(const uint16 *in, const uchar *inCol ,uchar *out,const int minDist, const int maxDist,const int cols, const int rows)
+dtmKernelColor(const uint16 *in, const uchar *inCol ,uchar *out,const float minDist, const float maxDist,const int cols, const int rows)
 {
 	__shared__  uint16 sharedIn[N][N];
 	__shared__  uchar sharedColor[N][N];
@@ -136,33 +136,41 @@ dtmKernelColor(const uint16 *in, const uchar *inCol ,uchar *out,const int minDis
 }
 
 __global__ void
-dtmKernelColorAlternative(const uint16 *in, uchar *inCol,const int minDist, const int maxDist,const int cols, const int rows)
+dtmKernelColorAlternative(const uint16 *in, uchar *inCol,const float minDist, const float maxDist,const int cols, const int rows, const int colorElemSize)
 {
 	__shared__  float sharedIn[N][N];
-	__shared__  float sharedColor[N][N];
+	//__shared__  float sharedColor[N][N];
 	__shared__  float sharedTmp[N][N];
 
 	unsigned int tx(threadIdx.x);
 	unsigned int ty(threadIdx.y);
-	unsigned int ind(blockIdx.x*blockDim.x + blockIdx.y*blockDim.y*cols + ty*cols + tx);
-	//unsigned int tid(ty*blockDim.x + tx);
+	unsigned int ind((blockIdx.x*blockDim.x + blockIdx.y*blockDim.y*cols + ty*cols + tx));
 
-
-	sharedIn[ty][tx] = in[ind];
+	sharedIn[ty][tx] = static_cast<float>(in[ind]);
 	sharedTmp[ty][tx] = 0.f;
-	sharedColor[ty][tx] = inCol[ind];
+	//sharedColor[ty][tx] = static_cast<float>(inCol[ind]);
 	__syncthreads();
 
 	if (sharedIn[ty][tx] < 2047)
 	{
-		sharedTmp[ty][tx] = static_cast<float>(1.0 / static_cast<float>(sharedIn[ty][tx]*-0.0030711016f + 3.330949516f));
+		sharedTmp[ty][tx] = static_cast<float>(1.0f / static_cast<float>(sharedIn[ty][tx]*-0.0030711016f + 3.330949516f));
 
 
-		if ((sharedTmp[ty][tx] < minDist) || (sharedTmp[ty][tx] > maxDist))
+		if ((sharedTmp[ty][tx] <= minDist) || (sharedTmp[ty][tx] >= maxDist))
 		{
 			//sharedColor[ty][tx] = 0;
-			inCol[ind] = 0;
+			//inCol[ind] = 0;
+			//TODO: think of a way to generalize this
+			inCol[ind*3 + 0] = 0;
+			inCol[ind*3 + 1] = 0;
+			inCol[ind*3 + 2] = 0;
 		}
+	}
+	else
+	{
+		inCol[ind*3 + 0] = 0;
+		inCol[ind*3 + 1] = 0;
+		inCol[ind*3 + 2] = 0;
 	}
 
 	__syncthreads();
@@ -171,7 +179,7 @@ dtmKernelColorAlternative(const uint16 *in, uchar *inCol,const int minDist, cons
 }
 
 __global__ void
-depthToWorldColorKernel(const uint16 *in, const float *trMat ,SWorldPoint *out,const int minDist, const int maxDist,const int cols, const int rows)
+depthToWorldColorKernel(const uint16 *in, const float *trMat ,SWorldPoint *out,const float minDist, const float maxDist,const int cols, const int rows)
 {
 	__shared__  uint16 sharedIn[N][N];
 	__shared__  SWorldPoint* sharedOut[N][N];
@@ -220,7 +228,7 @@ depthToWorldColorKernel(const uint16 *in, const float *trMat ,SWorldPoint *out,c
 }
 
 
-float dtmGpu( uchar* h_in, uchar* h_out, const int rows, const int cols, const int minDist, const int maxDist)
+float dtmGpu( uchar* h_in, uchar* h_out, const int rows, const int cols, const float minDist, const float maxDist)
 {
 	const int SIZE = rows * cols * sizeof(uint16);
 	cudaEvent_t start, stop;
@@ -265,10 +273,10 @@ float dtmGpu( uchar* h_in, uchar* h_out, const int rows, const int cols, const i
 	return msec;
 }
 
-void dtmGpuColor( uint16* h_in, uchar* h_inCol,uchar* h_outCol, const int rows, const int cols, const int minDist, const int maxDist)
+void dtmGpuColor( uint16* h_in, uchar* h_inCol,uchar* h_outCol, const int rows, const int cols, const float minDist, const float maxDist, const int colorElemSize)
 {
 	const int SIZEU16 = rows * cols * sizeof(uint16);
-	const int SIZEU8 = rows * cols * sizeof(uchar);
+	const int SIZEU8CX = rows * cols * sizeof(uchar) * colorElemSize;
 	cudaEvent_t start, stop;
 	
 	checkCudaErrors( cudaEventCreate(&start) );
@@ -278,15 +286,15 @@ void dtmGpuColor( uint16* h_in, uchar* h_inCol,uchar* h_outCol, const int rows, 
 	uint16 *d_in = NULL;
 	checkCudaErrors( cudaMalloc((void **)&d_in, SIZEU16) );
 	uchar *d_inCol = NULL;
-	checkCudaErrors( cudaMalloc((void **)&d_inCol, SIZEU8) );
+	checkCudaErrors( cudaMalloc((void **)&d_inCol, SIZEU8CX) );
 
 	// Allocate the device output image
 	uchar *d_out = NULL;
-	checkCudaErrors( cudaMalloc((void **)&d_out, SIZEU8) );
+	checkCudaErrors( cudaMalloc((void **)&d_out, SIZEU8CX) );
 
 	// Copy the host input image  to the device memory
 	checkCudaErrors( cudaMemcpy(d_in, h_in, SIZEU16, cudaMemcpyHostToDevice) );
-	checkCudaErrors( cudaMemcpy(d_inCol, h_inCol, SIZEU8, cudaMemcpyHostToDevice) );
+	checkCudaErrors( cudaMemcpy(d_inCol, h_inCol, SIZEU8CX, cudaMemcpyHostToDevice) );
 
 	checkCudaErrors( cudaEventRecord(start, NULL) );
 
@@ -294,7 +302,7 @@ void dtmGpuColor( uint16* h_in, uchar* h_inCol,uchar* h_outCol, const int rows, 
 	dim3 block(N, N);
 	dim3 grid(cols / N, rows / N);
 	//dtmKernelColor<<<grid, block>>>(d_in, d_inCol, d_out, minDist, maxDist,cols,rows);
-	dtmKernelColorAlternative<<<grid, block>>>(d_in,d_inCol,minDist, maxDist,cols,rows);
+	dtmKernelColorAlternative<<<grid, block>>>(d_in,d_inCol,minDist, maxDist,cols,rows,colorElemSize);
 	checkCudaErrors( cudaGetLastError() );
 
 	checkCudaErrors( cudaEventRecord(stop, NULL) );
@@ -302,7 +310,7 @@ void dtmGpuColor( uint16* h_in, uchar* h_inCol,uchar* h_outCol, const int rows, 
 
 	// Copy the device result to the host
 	//checkCudaErrors( cudaMemcpy(h_outCol, d_out, SIZEU8, cudaMemcpyDeviceToHost) );
-	checkCudaErrors( cudaMemcpy(h_outCol, d_in, SIZEU8, cudaMemcpyDeviceToHost) );
+	checkCudaErrors( cudaMemcpy(h_outCol, d_inCol, SIZEU8CX, cudaMemcpyDeviceToHost) );
 
 	checkCudaErrors( cudaFree(d_in) );
 	checkCudaErrors( cudaFree(d_inCol) );
@@ -314,7 +322,7 @@ void dtmGpuColor( uint16* h_in, uchar* h_inCol,uchar* h_outCol, const int rows, 
 	//printf("This took us %fl", msec);
 }
 
-void depthToRgbWorldPoint(uchar* h_in, float* h_transMat ,uchar* h_out, const int rows, const int cols, const int minDist, const int maxDist)
+void depthToRgbWorldPoint(uchar* h_in, float* h_transMat ,uchar* h_out, const int rows, const int cols, const float minDist, const float maxDist)
 {
 		const int SIZEU16 = rows * cols * sizeof(uint16);
 		const int SIZEWP = rows * cols * sizeof(SWorldPoint);

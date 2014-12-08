@@ -100,7 +100,7 @@ public:
 		}
 	}
 
-	bool getDepth(Mat& output) {
+	bool getDepthWithDist(Mat& output) {
 		Mat dtmMat(Size(640, 480), CV_16UC1);
 		float ms1, ms2;
 		static float totalmsg(0.f),totalmsc(0.f);
@@ -109,7 +109,7 @@ public:
 		if (m_new_depth_frame) {
 #ifdef __CPU_VERSION__
 			ms1 = dtmCpu(reinterpret_cast<uint16*>(depthMat.data),
-					reinterpret_cast<uint16*>(dtmMat.data), 1, 2);
+					reinterpret_cast<uint16*>(dtmMat.data), 2, 2.5);
 			//printf("The Cpu version took me %f millisecond\n", ms1);
 			ms2 = dtmGpu(depthMat.data, dtmMat.data, KINECT_ROWS, KINECT_COLS,
 					1, 2);
@@ -168,7 +168,7 @@ public:
 
 			depthToRgbWorldPoint(depthMat.data,
 					reinterpret_cast<float*>(final.data), dtmMat.data,
-					KINECT_ROWS, KINECT_COLS, 1, 2);
+					KINECT_ROWS, KINECT_COLS, 2, 2.5);
 			dtmMat.convertTo(output, CV_8UC1, 255.0 / 2048.0);
 			m_new_depth_frame = false;
 			m_depth_mutex.unlock();
@@ -210,6 +210,20 @@ public:
 		return miliseconds;
 	}
 
+	bool getDepth(Mat& output) {
+					m_depth_mutex.lock();
+					if(m_new_depth_frame) {
+						depthMat.convertTo(output, CV_8UC1, 255.0/2048.0);
+						//depthMat.copyTo(output);
+						m_new_depth_frame = false;
+						m_depth_mutex.unlock();
+						return true;
+					} else {
+						m_depth_mutex.unlock();
+						return false;
+					}
+				}
+
 	bool getColorDist(Mat& output) {
 		Mat dtmMat(Size(640, 480), CV_8UC3);
 		m_depth_mutex.lock();
@@ -217,7 +231,7 @@ public:
 		if (m_new_depth_frame) {
 			cv::cvtColor(rgbMat, output, CV_RGB2BGR);
 			dtmGpuColor(reinterpret_cast<uint16*>(depthMat.data), output.data,
-					output.data, KINECT_ROWS, KINECT_COLS, 1, 2);
+					output.data, KINECT_ROWS, KINECT_COLS, 1, 2, 3);
 			m_new_depth_frame = false;
 			m_depth_mutex.unlock();
 			m_rgb_mutex.unlock();
@@ -302,7 +316,8 @@ int main(int argc, char **argv) {
 	//TUByte* buffer = new TUByte[KINECT_FRAME_SIZE];
 
 	Mat depthMat(Size(640, 480), CV_16UC1);
-	Mat depthf(Size(640, 480), CV_8UC1);
+	Mat depthf1(Size(640, 480), CV_8UC1);
+	Mat depthf2(Size(640, 480), CV_8UC1);
 	Mat rgbMat(Size(640, 480), CV_8UC3, Scalar(0));
 	Mat ownMat(Size(640, 480), CV_8UC3, Scalar(0));
 
@@ -311,27 +326,31 @@ int main(int argc, char **argv) {
 	// Freenect::Freenect<MyFreenectDevice> freenect;
 	// MyFreenectDevice& device = freenect.createDevice(0);
 	// by these two lines:
-
+	//printf("the size of the color matrix is %d just as rows*cols*sizeofchar*3channels %d",rgbMat.rows*rgbMat.cols*rgbMat.elemSize(),640*480*sizeof(uchar)*3);
 	Freenect::Freenect freenect;
 	MyFreenectDevice& device = freenect.createDevice<MyFreenectDevice>(0);
 	device.InitSocket();
 	namedWindow("rgb", CV_WINDOW_AUTOSIZE);
 	namedWindow("depth", CV_WINDOW_AUTOSIZE);
+	namedWindow("regularDepth", CV_WINDOW_AUTOSIZE);
 	device.startVideo();
 	device.startDepth();
 	time(&startTime);
 	while (!die) {
 		//device.getVideo(rgbMat);
 		//device.getDepth(depthMat);
-		//device.getColorDist(rgbMat);
-		device.getDepth(depthf);
-		//cv::imshow("rgb", rgbMat);
+		device.getColorDist(rgbMat);
+		device.getDepthWithDist(depthf1);
+		device.getDepth(depthf2);
+
+		cv::imshow("rgb", rgbMat);
 		//depthMat.convertTo(depthf, CV_8UC1, 255.0/2048.0);
-		cv::imshow("depth", depthf);
+		cv::imshow("depth", depthf1);
+		cv::imshow("regularDepth", depthf2);
 		//device.sendData(reinterpret_cast<TUByte*>(depthf.data),KINECT_FRAME_SIZE);
 		//device.sendData(c,15000);
 		//cv::imwrite("GrayImg.jpg",depthf);
-		device.sendKinectFrameUDP(static_cast<TUByte*>(depthf.data), CHUNK_SIZE,
+		device.sendKinectFrameUDP(static_cast<TUByte*>(depthf1.data), CHUNK_SIZE,
 				KINECT_FRAME_SIZE);
 		++depthCounter;
 		if (abs(difftime(startTime, time(&currTime))) >= 1) //if time passed one sec
