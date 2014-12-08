@@ -66,9 +66,9 @@ transformByPoint(SWorldPoint*** inPoints, const float* trMat, SWorldPoint*** tra
 __global__ void
 dtmKernel(const uint16 *in, uint16 *out,const int minDist, const int maxDist,const int cols, const int rows)
 {
-	__shared__  uint16 sharedIn[N][N];
+	__shared__  float sharedIn[N][N];
 	__shared__  float sharedTmp[N][N];
-	__shared__  uint16 sharedOut[N][N];
+	__shared__  float sharedOut[N][N];
 
 	unsigned int tx(threadIdx.x);
 	unsigned int ty(threadIdx.y);
@@ -83,7 +83,7 @@ dtmKernel(const uint16 *in, uint16 *out,const int minDist, const int maxDist,con
 
 	if (sharedIn[ty][tx] < 2047)
 	{
-		sharedTmp[ty][tx] = static_cast<float>(1.0 / static_cast<double>(sharedIn[ty][tx]*-0.0030711016 + 3.330949516));
+		sharedTmp[ty][tx] = static_cast<float>(1.0f / static_cast<float>(sharedIn[ty][tx]*-0.0030711016f + 3.330949516f));
 
 
 		if ((sharedTmp[ty][tx] >= minDist) && (sharedTmp[ty][tx] <= maxDist))
@@ -95,7 +95,7 @@ dtmKernel(const uint16 *in, uint16 *out,const int minDist, const int maxDist,con
 	__syncthreads();
 
 	//out[ind] = sharedIn[ty][tx];
-	out[ind] = sharedOut[ty][tx];
+	out[ind] = static_cast<uint16>(sharedOut[ty][tx]);
 }
 
 
@@ -133,6 +133,41 @@ dtmKernelColor(const uint16 *in, const uchar *inCol ,uchar *out,const int minDis
 	__syncthreads();
 
 	out[ind] = sharedOut[ty][tx];
+}
+
+__global__ void
+dtmKernelColorAlternative(const uint16 *in, uchar *inCol,const int minDist, const int maxDist,const int cols, const int rows)
+{
+	__shared__  float sharedIn[N][N];
+	__shared__  float sharedColor[N][N];
+	__shared__  float sharedTmp[N][N];
+
+	unsigned int tx(threadIdx.x);
+	unsigned int ty(threadIdx.y);
+	unsigned int ind(blockIdx.x*blockDim.x + blockIdx.y*blockDim.y*cols + ty*cols + tx);
+	//unsigned int tid(ty*blockDim.x + tx);
+
+
+	sharedIn[ty][tx] = in[ind];
+	sharedTmp[ty][tx] = 0.f;
+	sharedColor[ty][tx] = inCol[ind];
+	__syncthreads();
+
+	if (sharedIn[ty][tx] < 2047)
+	{
+		sharedTmp[ty][tx] = static_cast<float>(1.0 / static_cast<float>(sharedIn[ty][tx]*-0.0030711016f + 3.330949516f));
+
+
+		if ((sharedTmp[ty][tx] < minDist) || (sharedTmp[ty][tx] > maxDist))
+		{
+			//sharedColor[ty][tx] = 0;
+			inCol[ind] = 0;
+		}
+	}
+
+	__syncthreads();
+
+	//inCol[ind] = static_cast<uchar>(sharedColor[ty][tx]);
 }
 
 __global__ void
@@ -230,7 +265,7 @@ float dtmGpu( uchar* h_in, uchar* h_out, const int rows, const int cols, const i
 	return msec;
 }
 
-void dtmGpuColor( uchar* h_in, uchar* h_inCol,uchar* h_out, const int rows, const int cols, const int minDist, const int maxDist)
+void dtmGpuColor( uint16* h_in, uchar* h_inCol,uchar* h_outCol, const int rows, const int cols, const int minDist, const int maxDist)
 {
 	const int SIZEU16 = rows * cols * sizeof(uint16);
 	const int SIZEU8 = rows * cols * sizeof(uchar);
@@ -240,7 +275,7 @@ void dtmGpuColor( uchar* h_in, uchar* h_inCol,uchar* h_out, const int rows, cons
 	checkCudaErrors( cudaEventCreate(&stop) );
 
 	// Allocate the device input images
-	uchar *d_in = NULL;
+	uint16 *d_in = NULL;
 	checkCudaErrors( cudaMalloc((void **)&d_in, SIZEU16) );
 	uchar *d_inCol = NULL;
 	checkCudaErrors( cudaMalloc((void **)&d_inCol, SIZEU8) );
@@ -258,14 +293,16 @@ void dtmGpuColor( uchar* h_in, uchar* h_inCol,uchar* h_out, const int rows, cons
 	// Launch the CUDA Kernel
 	dim3 block(N, N);
 	dim3 grid(cols / N, rows / N);
-	dtmKernelColor<<<grid, block>>>(reinterpret_cast<uint16*>(d_in), d_inCol, d_out, minDist, maxDist,cols,rows);
+	//dtmKernelColor<<<grid, block>>>(d_in, d_inCol, d_out, minDist, maxDist,cols,rows);
+	dtmKernelColorAlternative<<<grid, block>>>(d_in,d_inCol,minDist, maxDist,cols,rows);
 	checkCudaErrors( cudaGetLastError() );
 
 	checkCudaErrors( cudaEventRecord(stop, NULL) );
 	checkCudaErrors( cudaEventSynchronize(stop) );
 
 	// Copy the device result to the host
-	checkCudaErrors( cudaMemcpy(h_out, d_out, SIZEU8, cudaMemcpyDeviceToHost) );
+	//checkCudaErrors( cudaMemcpy(h_outCol, d_out, SIZEU8, cudaMemcpyDeviceToHost) );
+	checkCudaErrors( cudaMemcpy(h_outCol, d_in, SIZEU8, cudaMemcpyDeviceToHost) );
 
 	checkCudaErrors( cudaFree(d_in) );
 	checkCudaErrors( cudaFree(d_inCol) );
@@ -284,15 +321,6 @@ void depthToRgbWorldPoint(uchar* h_in, float* h_transMat ,uchar* h_out, const in
 		const int TRMATRC = 4;
 		const int SIZETRMAT = TRMATRC*TRMATRC*sizeof(float);
 		cudaEvent_t start, stop;
-
-		/*static float trMat[] = { 9.9984628826577793e-01f, 1.2635359098409581e-03f, -1.7487233004436643e-02f , 0.f,
-								-1.4779096108364480e-03f, 9.9992385683542895e-01f, -1.2251380107679535e-02f, 0.f,
-								1.7470421412464927e-02f, 1.2275341476520762e-02f, 9.9977202419716948e-01f, 0.f,
-								0.f, 0.f, 0.f , 1.f};
-		static float translation[] = {1.9985242312092553e-02f, -7.4423738761617583e-04f, -1.0916736334336222e-02f, 0};
-		static float finalMat[TRMATRC][TRMATRC];*/
-
-
 
 
 		checkCudaErrors( cudaEventCreate(&start) );
