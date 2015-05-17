@@ -14,9 +14,10 @@
 
 #define __CPU_VERSION__
 
-using namespace cv;
+using namespace cv;master
 using namespace std;
 using namespace NUdpSocket;
+//hello
 
 const TUDWord CHUNK_SIZE(60000); //60k byte
 const TUDWord DELAY_SEND(6000); //U SEC
