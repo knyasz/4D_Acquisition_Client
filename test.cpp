@@ -14,13 +14,12 @@
 
 #define __CPU_VERSION__
 
-using namespace cv;master
+using namespace cv;
 using namespace std;
 using namespace NUdpSocket;
-//hello
 
 const TUDWord CHUNK_SIZE(60000); //60k byte
-const TUDWord DELAY_SEND(6000); //U SEC
+const TUDWord DELAY_SEND(0); //U SEC
 const TUDWord KINECT_ROWS(480);
 const TUDWord KINECT_COLS(640);
 
@@ -44,15 +43,11 @@ private:
 class MyFreenectDevice: public Freenect::FreenectDevice {
 public:
 	MyFreenectDevice(freenect_context *_ctx, int _index) :
-			Freenect::FreenectDevice(_ctx, _index),
-			m_buffer_depth(FREENECT_DEPTH_11BIT),
-			m_buffer_rgb(FREENECT_VIDEO_RGB),
-			m_gamma(2048),
-			m_new_rgb_frame(false),
-			m_new_depth_frame(false),
-			depthMat(Size(640, 480), CV_16UC1),
-			rgbMat(Size(640, 480), CV_8UC3,Scalar(0)),
-			ownMat(Size(640, 480), CV_8UC3, Scalar(0)) {
+			Freenect::FreenectDevice(_ctx, _index), m_buffer_depth(
+					FREENECT_DEPTH_11BIT), m_buffer_rgb(FREENECT_VIDEO_RGB), m_gamma(
+					2048), m_new_rgb_frame(false), m_new_depth_frame(false), depthMat(
+					Size(640, 480), CV_16UC1), rgbMat(Size(640, 480), CV_8UC3,
+					Scalar(0)), ownMat(Size(640, 480), CV_8UC3, Scalar(0)) {
 
 		for (unsigned int i = 0; i < 2048; i++) {
 			float v = i / 2048.0;
@@ -117,7 +112,7 @@ public:
 					reinterpret_cast<uint16*>(dtmMat.data), 2, 2.5);
 			//printf("The Cpu version took me %f millisecond\n", ms1);
 			ms2 = dtmGpu(depthMat.data, dtmMat.data, KINECT_ROWS, KINECT_COLS,
-					1, 2);
+					2, 2.5);
 			totalmsg += ms2;
 			totalmsc += ms1;
 			++count;
@@ -133,11 +128,10 @@ public:
 			}
 			
 			//printf("the Gpu version took me millisecond %fl\n", ms2);
-
 #else
 			dtmGpu(depthMat.data,dtmMat.data,KINECT_ROWS,KINECT_COLS,1,2);
 #endif
-			dtmMat.coUDPnvertTo(output, CV_8UC1, 255.0 / 2048.0);
+			dtmMat.convertTo(output, CV_8UC1, 255.0 / 2048.0);
 			m_new_depth_frame = false;
 			m_depth_mutex.unlock();
 			return true;
@@ -237,7 +231,7 @@ public:
 		if (m_new_depth_frame) {
 			cv::cvtColor(rgbMat, output, CV_RGB2BGR);
 			dtmGpuColor(reinterpret_cast<uint16*>(depthMat.data), output.data,
-					output.data, KINECT_ROWS, KINECT_COLS, 1, 2, 3);
+					output.data, KINECT_ROWS, KINECT_COLS, 2, 2.5, 3);
 			m_new_depth_frame = false;
 			m_depth_mutex.unlock();
 			m_rgb_mutex.unlock();
@@ -337,8 +331,8 @@ int main(int argc, char **argv) {
 	MyFreenectDevice& device = freenect.createDevice<MyFreenectDevice>(0);
 	device.InitSocket();
 	namedWindow("rgb", CV_WINDOW_AUTOSIZE);
-	namedWindow("depth", CV_WINDOW_AUTOSIZE);
-	namedWindow("regularDepth", CV_WINDOW_AUTOSIZE);
+	//namedWindow("depth", CV_WINDOW_AUTOSIZE);
+	//namedWindow("regularDepth", CV_WINDOW_AUTOSIZE);
 	device.startVideo();
 	device.startDepth();
 	time(&startTime);
@@ -346,23 +340,26 @@ int main(int argc, char **argv) {
 		//device.getVideo(rgbMat);
 		//device.getDepth(depthMat);
 		device.getColorDist(rgbMat);
-		device.getDepthWithDist(depthf1);
-		device.getDepth(depthf2);
+		//device.getDepthWithDist(depthf1);
+		//device.getDepth(depthf2);
 
 		cv::imshow("rgb", rgbMat);
 		//depthMat.convertTo(depthf, CV_8UC1, 255.0/2048.0);
-		cv::imshow("depth", depthf1);
-		cv::imshow("regularDepth", depthf2);
+		//cv::imshow("depth", depthf1);
+		//cv::imshow("regularDepth", depthf2);
 		//device.sendData(reinterpret_cast<TUByte*>(depthf.data),KINECT_FRAME_SIZE);
 		//device.sendData(c,15000);
 		//cv::imwrite("GrayImg.jpg",depthf);
-		device.sendKinectFrameUDP(static_cast<TUByte*>(depthf1.data), CHUNK_SIZE,
-				KINECT_FRAME_SIZE);
+		//device.sendKinectFrameUDP(static_cast<TUByte*>(depthMat.data), CHUNK_SIZE,
+		//		KINECT_FRAME_SIZE);
+
+		device.sendKinectFrameUDP(static_cast<TUByte*>(rgbMat.data), CHUNK_SIZE,
+				KINECT_FRAME_SIZE*3);
 		++depthCounter;
 		if (abs(difftime(startTime, time(&currTime))) >= 1) //if time passed one sec
 				{
 
-			//printf("I successfully sent (%d) frame at this second \n",depthCounter);
+			printf("I successfully sent (%d) frame at this second \n",depthCounter);
 			depthCounter = 0;
 //getchar();
 			startTime = time(NULL);
