@@ -4,3 +4,5 @@
 /cuda
 *.o
 /test
+*~
+GrayImg.jpg
