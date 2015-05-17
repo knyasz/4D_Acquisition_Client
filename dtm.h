@@ -1,5 +1,5 @@
 #define PI	3.14159265358979323846f
-#define N	32
+#define N	16
 
 typedef unsigned char uchar;
 typedef unsigned short int uint16;
@@ -52,7 +52,7 @@ struct SWorldPoint
 };
 
 
-float dtmGpu( uchar* in, uchar* out, const int rows, const int cols, const int minDist, const int maxDist);
-void dtmGpuColor( uchar* in, uchar* inCol, uchar* out, const int rows, const int cols, const int minDist, const int maxDist);
-void depthToRgbWorldPoint(uchar* in, float* transMat, uchar* out, const int rows, const int cols, const int minDist, const int maxDist);
+float dtmGpu( uchar* in, uchar* out, const int rows, const int cols, const float minDist, const float maxDist);
+void dtmGpuColor( uint16* in, uchar* inCol, uchar* out, const int rows, const int cols, const float minDist, const float maxDist,const int colorElemSize);
+void depthToRgbWorldPoint(uchar* in, float* transMat, uchar* out, const int rows, const int cols, const float minDist, const float maxDist);
 
