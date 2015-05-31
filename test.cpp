@@ -19,7 +19,7 @@ using namespace std;
 using namespace NUdpSocket;
 
 const TUDWord CHUNK_SIZE(60000); //60k byte
-const TUDWord DELAY_SEND(0); //U SEC
+const TUDWord DELAY_SEND(6000); //U SEC
 const TUDWord KINECT_ROWS(480);
 const TUDWord KINECT_COLS(640);
 
@@ -315,46 +315,58 @@ int main(int argc, char **argv) {
 //FILE* sentData;
 	//TUByte* buffer = new TUByte[KINECT_FRAME_SIZE];
 
-	Mat depthMat(Size(640, 480), CV_16UC1);
-	Mat depthf1(Size(640, 480), CV_8UC1);
-	Mat depthf2(Size(640, 480), CV_8UC1);
+	Mat depthFromKinect(Size(640, 480), CV_16UC1);
+	Mat depthConvertedToShow(Size(640, 480), CV_8UC1);
 	Mat rgbMat(Size(640, 480), CV_8UC3, Scalar(0));
-	Mat ownMat(Size(640, 480), CV_8UC3, Scalar(0));
 
 	// The next two lines must be changed as Freenect::Freenect
 	// isn't a template but the method createDevice:
 	// Freenect::Freenect<MyFreenectDevice> freenect;
 	// MyFreenectDevice& device = freenect.createDevice(0);
 	// by these two lines:
-	//printf("the size of the color matrix is %d just as rows*cols*sizeofchar*3channels %d",rgbMat.rows*rgbMat.cols*rgbMat.elemSize(),640*480*sizeof(uchar)*3);
+//	printf("the size of the color matrix "
+//			"is %d just as rows*cols*sizeofchar*3channels %d",
+//			rgbMat.rows*rgbMat.cols*rgbMat.elemSize(),640*480*sizeof(uchar)*3);
 	Freenect::Freenect freenect;
 	MyFreenectDevice& device = freenect.createDevice<MyFreenectDevice>(0);
 	device.InitSocket();
-	namedWindow("rgb", CV_WINDOW_AUTOSIZE);
-	//namedWindow("depth", CV_WINDOW_AUTOSIZE);
+
+//	namedWindow("rgb", CV_WINDOW_AUTOSIZE);
+	namedWindow("depth", CV_WINDOW_AUTOSIZE);
 	//namedWindow("regularDepth", CV_WINDOW_AUTOSIZE);
-	device.startVideo();
+
+//	device.startVideo();
 	device.startDepth();
 	time(&startTime);
 	while (!die) {
-		//device.getVideo(rgbMat);
-		//device.getDepth(depthMat);
-		device.getColorDist(rgbMat);
-		//device.getDepthWithDist(depthf1);
-		//device.getDepth(depthf2);
+//		device.getVideo(rgbMat);
+//		device.getDepth(depthFromKinect);
 
-		cv::imshow("rgb", rgbMat);
-		//depthMat.convertTo(depthf, CV_8UC1, 255.0/2048.0);
-		//cv::imshow("depth", depthf1);
-		//cv::imshow("regularDepth", depthf2);
-		//device.sendData(reinterpret_cast<TUByte*>(depthf.data),KINECT_FRAME_SIZE);
-		//device.sendData(c,15000);
-		//cv::imwrite("GrayImg.jpg",depthf);
-		//device.sendKinectFrameUDP(static_cast<TUByte*>(depthMat.data), CHUNK_SIZE,
-		//		KINECT_FRAME_SIZE);
+//		device.getColorDist(rgbMat);
 
-		device.sendKinectFrameUDP(static_cast<TUByte*>(rgbMat.data), CHUNK_SIZE,
-				KINECT_FRAME_SIZE*3);
+//		device.getDepthWithDist(depthConvertedToShow);
+		device.getDepth(depthConvertedToShow);
+
+//		cv::imshow("rgb", rgbMat);
+
+//		depthFromKinect.convertTo(depthConvertedToShow, CV_8UC1, 255.0/2048.0);
+		cv::imshow("depth", depthConvertedToShow);
+//		cv::imshow("regularDepth", depthConvertedToShow);
+
+//		device.sendData(reinterpret_cast<TUByte*>(depthConvertedToShow.data),KINECT_FRAME_SIZE);
+
+//		device.sendData(c,15000);
+//		cv::imwrite("GrayImg.jpg",depthConvertedToShow);
+
+		device.sendKinectFrameUDP(
+				static_cast<TUByte*>(depthConvertedToShow.data),
+				CHUNK_SIZE,
+				KINECT_FRAME_SIZE);
+
+//		device.sendKinectFrameUDP(
+//				static_cast<TUByte*>(rgbMat.data),
+//				CHUNK_SIZE,
+//				KINECT_FRAME_SIZE*3);
 		++depthCounter;
 		if (abs(difftime(startTime, time(&currTime))) >= 1) //if time passed one sec
 				{
@@ -364,25 +376,29 @@ int main(int argc, char **argv) {
 //getchar();
 			startTime = time(NULL);
 		}
-		//getchar();
-		//sentData = fopen("sentData.bin","wb");
-		//fwrite(depthf.data,sizeof(char),KINECT_FRAME_SIZE,sentData);
-		//fclose(sentData);
-		char k = cvWaitKey(5);
-		if (k == 27) {
-			cvDestroyWindow("rgb");
-			cvDestroyWindow("depth");
-			break;
-		}
-		if (k == 8) {
-			std::ostringstream file;
-			file << filename << i_snap << suffix;
-			cv::imwrite(file.str(), rgbMat);
-			i_snap++;
-		}
-		if (iter >= 1000)
-			break;
-		iter++;
+
+
+//		getchar();
+//		sentData = fopen("sentData.bin","wb");
+//		fwrite(depthf.data,sizeof(char),KINECT_FRAME_SIZE,sentData);
+//		fclose(sentData);
+
+
+		char k = cvWaitKey(1);
+//		if (k == 27) {
+//			cvDestroyWindow("rgb");
+//			cvDestroyWindow("depth");
+//			break;
+//		}
+//		if (k == 8) {
+//			std::ostringstream file;
+//			file << filename << i_snap << suffix;
+//			cv::imwrite(file.str(), rgbMat);
+//			i_snap++;
+//		}
+//		if (iter >= 1000)
+//			break;
+//		iter++;
 	}
 
 	device.stopVideo();

@@ -65,129 +65,129 @@ namespace NUdpSocket
         //public declarations
     public:
 
-        //constructor
-        CUdpSocket();
-        
-        ////////////////////////////////////////
-        //name  : initialize
-        //desc  : initializes server
-        //arg   : vonfig - the socket configuration   
-        //return: true if init ok false if not 
-        ///////////////////////////////////////
-        bool configureSocket(const SSocketConfig &config);
-        
-        ////////////////////////////////////////
-        //name  : openSocket
-        //desc  : open the socket that configuration was passed
-        //arg   : -  
-        //return: true if open ok false if not 
-        ///////////////////////////////////////
-        bool openSocket();
-        
-        ////////////////////////////////////////
-        //name  : closeSocket
-        //desc  : closes open socket
-        //arg   : -  
-        //return: true if open ok false if not 
-        ///////////////////////////////////////
-        bool closeSocket();
+		//constructor
+		CUdpSocket();
 
-        ////////////////////////////////////////
-        //name  : reciveData
-        //desc  : recives data sequence
-        //arg   : buffer - buffer to fill
-        //      : size: recived data size
-        //        to - timeout in mili seconds
-        //return: true if recived ok false if not 
-        ///////////////////////////////////////
-        bool reciveData(TUByte* buffer, TUDWord& size,TSDWord to = WAIT_FOREVER);
-        
-        ////////////////////////////////////////
-        //name  : sendData
-        //desc  : send data on the socket
-        //arg   : buffer - buffer to send
-        //        size - the size of the buffer to send
-        //return: true if sent ok false if not 
-        ///////////////////////////////////////
-        bool sendData(TUByte* buffer, TUDWord size);   
-        
-        ////////////////////////////////////////
-        //name  : isConfiguref
-        //return: true if configured false if not
-        ///////////////////////////////////////
-        inline bool isConfiguref() const
-        { return m_isConfigured; };
-        
-        ////////////////////////////////////////
-        //name  : isOpened
-        //return: true if opened false if not
-        ///////////////////////////////////////
-        inline bool isOpened() const
-        { return m_isOpen; };
+		////////////////////////////////////////
+		//name  : initialize
+		//desc  : initializes server
+		//arg   : vonfig - the socket configuration
+		//return: true if init ok false if not
+		///////////////////////////////////////
+		bool configureSocket(const SSocketConfig &config);
 
-        
-        //dtor
-        virtual ~CUdpSocket(){};
+		////////////////////////////////////////
+		//name  : openSocket
+		//desc  : open the socket that configuration was passed
+		//arg   : -
+		//return: true if open ok false if not
+		///////////////////////////////////////
+		bool openSocket();
+
+		////////////////////////////////////////
+		//name  : closeSocket
+		//desc  : closes open socket
+		//arg   : -
+		//return: true if open ok false if not
+		///////////////////////////////////////
+		bool closeSocket();
+
+		////////////////////////////////////////
+		//name  : reciveData
+		//desc  : recives data sequence
+		//arg   : buffer - buffer to fill
+		//      : size: recived data size
+		//        to - timeout in mili seconds
+		//return: true if recived ok false if not
+		///////////////////////////////////////
+		bool reciveData(TUByte* buffer, TUDWord& size,TSDWord to = WAIT_FOREVER);
+
+		////////////////////////////////////////
+		//name  : sendData
+		//desc  : send data on the socket
+		//arg   : buffer - buffer to send
+		//        size - the size of the buffer to send
+		//return: true if sent ok false if not
+		///////////////////////////////////////
+		bool sendData(TUByte* buffer, TUDWord size);
+
+		////////////////////////////////////////
+		//name  : isConfiguref
+		//return: true if configured false if not
+		///////////////////////////////////////
+		inline bool isConfiguref() const
+		{ return m_isConfigured; };
+
+		////////////////////////////////////////
+		//name  : isOpened
+		//return: true if opened false if not
+		///////////////////////////////////////
+		inline bool isOpened() const
+		{ return m_isOpen; };
 
 
-        //private declarations
-        private:
-      
+		//dtor
+		virtual ~CUdpSocket(){};
 
+
+		//private declarations
+		private:
 
 
 
-        ////////////////////////////////////////
-        //name  : handelError
-        //desc  : handles system errors
-        //arg   : the error number and the error string
-        //return: the error number
-        ///////////////////////////////////////
-        int handelError(const int errorNum, const char* errorStr="UDP_SOCKET_ERROR");
+
+
+		////////////////////////////////////////
+		//name  : handelError
+		//desc  : handles system errors
+		//arg   : the error number and the error string
+		//return: the error number
+		///////////////////////////////////////
+		int handelError(const int errorNum, const char* errorStr="UDP_SOCKET_ERROR");
 
 
 
-        //constructor
-        CUdpSocket& operator=(const CUdpSocket& other);
-        CUdpSocket(CUdpSocket& other);
+		//constructor
+		CUdpSocket& operator=(const CUdpSocket& other);
+		CUdpSocket(CUdpSocket& other);
 
-        //member that represents the port that will be listened to
-        TUDWord m_portNum;
-        
-        //member that represent the tgt_port
-        TUDWord m_tgtPort; 
+		//member that represents the port that will be listened to
+		TUDWord m_portNum;
 
-        //member that represents the socket
-        TUDWord m_socket;
+		//member that represent the tgt_port
+		TUDWord m_tgtPort;
 
-        //server address
-        struct sockaddr_in m_localAdd;
+		//member that represents the socket
+		TUDWord m_socket;
 
-        //clianet address
-        struct sockaddr_in m_tgtAdd;
-        
-        //meber that represent the maximum size of data
-        TUDWord m_maxDataSize;
-        
-        //member fd_set
-        fd_set m_fdr;
-        
-        //member that will calculate the time out
-        struct timeval m_timeOut;
-        
-        //member that represents the name of the socket
-        char m_name[MAX_NUM_CHARS];
-        
-        //meber that represent it the socket was configured
-        bool m_isConfigured;
-        
-        //member that represent if the socket was opened
-        bool m_isOpen;
-        
-       
-        //member that says if a fatal error accured 
-        //int  m_lastErr;
-    
+		//server address
+		struct sockaddr_in m_localAdd;
+
+		//clianet address
+		struct sockaddr_in m_tgtAdd;
+
+		//meber that represent the maximum size of data
+		TUDWord m_maxDataSize;
+
+		//member fd_set
+		fd_set m_fdr;
+
+		//member that will calculate the time out
+		struct timeval m_timeOut;
+
+		//member that represents the name of the socket
+		char m_name[MAX_NUM_CHARS];
+
+		//meber that represent it the socket was configured
+		bool m_isConfigured;
+
+		//member that represent if the socket was opened
+		bool m_isOpen;
+
+
+		//member that says if a fatal error accured
+		//int  m_lastErr;
+
 };
 }
 #endif	/* UDPSOCKET_H */
