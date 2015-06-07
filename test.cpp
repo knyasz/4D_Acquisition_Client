@@ -65,6 +65,10 @@ public:
 		m_rgb_mutex.lock();
 		uint8_t* rgb = static_cast<uint8_t*>(_rgb);
 		rgbMat.data = rgb;
+#define __CPU_VERSION__
+
+using namespace cv;
+using namespace std;
 		m_new_rgb_frame = true;
 		m_rgb_mutex.unlock();
 	}
