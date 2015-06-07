@@ -7,6 +7,8 @@
 
 #include "MyFreenectDevice.h"
 
+
+
 //MyFreenectDevice::MyFreenectDevice() {
 //	// TODO Auto-generated constructor stub
 //

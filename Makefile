@@ -101,9 +101,9 @@ ALL_LDFLAGS += $(addprefix -Xlinker ,$(LDFLAGS))
 ALL_LDFLAGS += $(addprefix -Xlinker ,$(EXTRA_LDFLAGS))
 
 # Common includes and paths for CUDA
-INCLUDES  := -I../../common/inc -I/usr/local/include/libfreenect -I/usr/include/opencv 
-LIBRARIES := -L/usr/local/lib -lfreenect udpSocket.a -L/usr/local/lib -lopencv_core -lopencv_highgui -lopencv_imgproc -L/usr/local/cuda/lib -lcudart -lnpps -lnppi -lnppc -lcufft
-
+INCLUDES  := -I../../common/inc -I/usr/local/include/libfreenect -I/usr/include/opencv  -I/usr/local/include/opencv
+#LIBRARIES := -L/usr/local/lib -lfreenect udpSocket.a -L/usr/local/lib -lopencv_core -lopencv_highgui -lopencv_imgproc -L/usr/local/cuda/lib -lcudart -lnpps -lnppi -lnppc -lcufft
+LIBRARIES := -L/usr/local/lib -lpthread -lfreenect udpSocket64bit.a -L/usr/local/lib -lopencv_core -lopencv_highgui -lopencv_imgproc -L/usr/local/cuda/lib64 -lcudart -lnpps -lnppi -lnppc -lcufft
 ################################################################################
 
 # CUDA code generation flags
@@ -115,7 +115,7 @@ GENCODE_SM30    := -gencode arch=compute_30,code=sm_30
 GENCODE_SM32    := -gencode arch=compute_32,code=sm_32
 GENCODE_SM35    := -gencode arch=compute_35,code=sm_35
 GENCODE_SM50    := -gencode arch=compute_50,code=sm_50
-GENCODE_SMXX    := -gencode findcudalib.mkarch=compute_50,code=compute_50
+GENCODE_SMXX    := -gencode arch=compute_50,code=compute_50
 ifeq ($(OS_ARCH),armv7l)
 GENCODE_FLAGS   ?= $(GENCODE_SM32)
 else
@@ -125,27 +125,31 @@ endif
 ################################################################################
 
 # Target rules
-all: build
+all:build
 
-build: test
+build:test
 
+test.o:test.cpp
+#	$(NVCC) $(INCLUDES) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ -c $^ $(LIBRARIES)
+	g++ $(INCLUDES) -o $@ -c $< 
+	
 dtmGpu.o:dtmGpu.cu
 	$(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $<
 	
-MyFreenectDevice.o:MyFreenectDevice.cpp 
-	$(NVCC) $(INCLUDES) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ -c $< $(LIBRARIES)
-test.o: test.cpp MyFreenectDevice.h
-	$(NVCC) $(INCLUDES) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ -c $< $(LIBRARIES)
-test: dtmGpu.o test.o MyFreenectDevice.o
-	$(NVCC) $(INCLUDES) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES)
-	mkdir -p ../../bin/$(OS_ARCH)/$(OSLOWER)/$(TARGET)$(if $(abi),/$(abi))
-	cp $@ ../../bin/$(OS_ARCH)/$(OSLOWER)/$(TARGET)$(if $(abi),/$(abi))
+MyFreenectDevice.o:MyFreenectDevice.cpp
+#	$(NVCC) $(INCLUDES) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ -c $^ $(LIBRARIES)
+	g++ $(INCLUDES) -o $@ -c $< 
+test:dtmGpu.o test.o MyFreenectDevice.o
+#	$(NVCC) $(INCLUDES) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES)
+#	mkdir -p ../../bin/$(OS_ARCH)/$(OSLOWER)/$(TARGET)$(if $(abi),/$(abi))
+#	cp $@ ../../bin/$(OS_ARCH)/$(OSLOWER)/$(TARGET)$(if $(abi),/$(abi))
+	g++ $(INCLUDES) -o $@ $^ $(LIBRARIES)
 
-run: build
+run:build
 	./test
 
 clean:
 	rm -f test *.o 
 	rm -rf /bin/$(OS_ARCH)/$(OSLOWER)/$(TARGET)$(if $(abi),/$(abi))/test
-clobber: clean
+clobber:clean
 

@@ -11,23 +11,17 @@
 
 #include "libfreenect.hpp"
 
-#include "udpSocket.h"
-#include "dtm.h"
+
 #include "MyFreenectDevice.h"
 
-#define __CPU_VERSION__
+
 
 using namespace cv;
 using namespace std;
+/*
 using namespace NUdpSocket;
-
-const TUDWord CHUNK_SIZE(60000); //60k byte
-const TUDWord DELAY_SEND(6000); //U SEC
-const TUDWord KINECT_ROWS(480);
-const TUDWord KINECT_COLS(640);
-
-TUDWord countGlobal;
-
+*/
+/*
 class myMutex {
 public:
 	myMutex() {
@@ -42,6 +36,31 @@ public:
 private:
 	pthread_mutex_t m_mutex;
 };
+*/
+/*
+const TUDWord CHUNK_SIZE(60000); //60k byte
+const TUDWord DELAY_SEND(6000); //U SEC
+const TUDWord KINECT_ROWS(480);
+const TUDWord KINECT_COLS(640);
+
+TUDWord countGlobal;
+*/
+/*
+class myMutex {
+public:
+	myMutex() {
+		pthread_mutex_init(&m_mutex, NULL);
+	}
+	void lock() {
+		pthread_mutex_lock(&m_mutex);
+	}
+	void unlock() {
+		pthread_mutex_unlock(&m_mutex);
+	}
+private:
+	pthread_mutex_t m_mutex;
+};
+*/
 /*
 class MyFreenectDevice: public Freenect::FreenectDevice {
 public:
@@ -89,7 +108,7 @@ using namespace std;
 			//printf("I successfully sent (%d) frame at this second \n",countGlobal);
 			countGlobal = 0;
 			//getchar();
-			startTime = time(NULL);
+			startTime = time(NULL#include <pthread.h>);
 		}
 		m_depth_mutex.unlock();
 	}
