@@ -1,48 +1,15 @@
-#include <iostream>
-#include <vector>
-#include <cmath>
-#include <pthread.h>
-#include <cv.h>
-#include <cxcore.h>
-#include <highgui.h>
-#include "unistd.h"
-#include "time.h"
-#include "math.h"
-
-#include "libfreenect.hpp"
-
-#include "udpSocket.h"
-#include "dtm.h"
-#include "MyFreenectDevice.h"
-
-#define __CPU_VERSION__
-
-using namespace cv;
-using namespace std;
-using namespace NUdpSocket;
-
-const TUDWord CHUNK_SIZE(60000); //60k byte
-const TUDWord DELAY_SEND(6000); //U SEC
-const TUDWord KINECT_ROWS(480);
-const TUDWord KINECT_COLS(640);
-
-TUDWord countGlobal;
-
-class myMutex {
-public:
-	myMutex() {
-		pthread_mutex_init(&m_mutex, NULL);
-	}
-	void lock() {
-		pthread_mutex_lock(&m_mutex);
-	}
-	void unlock() {
-		pthread_mutex_unlock(&m_mutex);
-	}
-private:
-	pthread_mutex_t m_mutex;
-};
 /*
+ * MyFreenectDevice.h
+ *
+ *  Created on: Jun 7, 2015
+ *      Author: alexandalex
+ */
+
+#ifndef MYFREENECTDEVICE_H_
+#define MYFREENECTDEVICE_H_
+
+#include <libfreenect.hpp>
+
 class MyFreenectDevice: public Freenect::FreenectDevice {
 public:
 	MyFreenectDevice(freenect_context *_ctx, int _index) :
@@ -127,9 +94,9 @@ public:
 				totalmsc = 0.f;
 				count = 0;
 				//getchar();
-				
+
 			}
-			
+
 			//printf("the Gpu version took me millisecond %fl\n", ms2);
 #else
 			dtmGpu(depthMat.data,dtmMat.data,KINECT_ROWS,KINECT_COLS,1,2);
@@ -166,7 +133,7 @@ public:
 			first = false;
 		}
 
-		m_depth_mutex.lock();
+		m_depth_mutex.lock();TSDWord
 		if (m_new_depth_frame) {
 
 			depthToRgbWorldPoint(depthMat.data,
@@ -175,7 +142,7 @@ public:
 			dtmMat.convertTo(output, CV_8UC1, 255.0 / 2048.0);
 			m_new_depth_frame = false;
 			m_depth_mutex.unlock();
-			return true;
+			return true;TSDWord
 		} else {
 			m_depth_mutex.unlock();
 			return false;
@@ -192,7 +159,7 @@ public:
 
 		for (uint16 rows(0); rows < KINECT_ROWS; ++rows) {
 			for (uint16 cols(0); cols < KINECT_COLS; ++cols) {
-				uint32 index(rows * KINECT_COLS + cols);
+				uint32 index(TSDWordrows * KINECT_COLS + cols);
 				if (inMat[index] < 2047) {
 					float tmp = static_cast<float>(1.0
 							/ static_cast<double>(inMat[index] * -0.0030711016
@@ -247,7 +214,7 @@ public:
 	}
 
 	bool InitSocket() {
-		bool rv(true);
+		bool rv(true);TSDWord
 		SSocketConfig conf("10.0.0.2", "10.0.0.1", 50555, 50555,
 				KINECT_FRAME_SIZE, "IR Video Img");
 		rv = rv && m_udpSocket.configureSocket(conf);
@@ -284,7 +251,7 @@ public:
 			}
 
 		}
-MyFreenectDevice.h
+
 		if (status) {
 			rv = true;
 			//printf("Successfuly sent data of size (%d)\n",totSize);
@@ -306,106 +273,9 @@ private:
 	bool m_new_rgb_frame;
 	bool m_new_depth_frame;
 	CUdpSocket m_udpSocket;
+
+//	MyFreenectDevice();
+//	virtual ~MyFreenectDevice();
 };
-*/
-int main(int argc, char **argv) {
-	bool die(false);
-	string filename("snapshot");
-	string suffix(".png");
-	int i_snap(0), iter(0);
-	int depthCounter(0);
-	time_t startTime(0.), currTime(0.);
-//FILE* sentData;
-	//TUByte* buffer = new TUByte[KINECT_FRAME_SIZE];
 
-	Mat depthFromKinect(Size(640, 480), CV_16UC1);
-	Mat depthConvertedToShow(Size(640, 480), CV_8UC1);
-	Mat rgbMat(Size(640, 480), CV_8UC3, Scalar(0));
-
-	// The next two lines must be changed as Freenect::Freenect
-	// isn't a template but the method createDevice:
-	// Freenect::Freenect<MyFreenectDevTSDWordice> freenect;
-	// MyFreenectDevice& device = freenect.createDevice(0);
-	// by these two lines:
-//	printf("the size of the color matrix "
-//			"is %d just as rows*cols*sizeofchar*3channels %d",
-//			rgbMat.rows*rgbMat.cols*rgbMat.elemSize(),640*480*sizeof(uchar)*3);
-	Freenect::Freenect freenect;
-	MyFreenectDevice& device = freenect.createDevice<MyFreenectDevice>(0);
-	device.InitSocket();
-
-//	namedWindow("rgb", CV_WINDOW_AUTOSIZE);
-	namedWindow("depth", CV_WINDOW_AUTOSIZE);
-	//namedWindow("regularDepth", CV_WINDOW_AUTOSIZE);
-
-//	device.startVideo();
-	device.startDepth();
-	time(&startTime);
-	while (!die) {
-//		device.getVideo(rgbMat);
-//		device.getDepth(depthFromKinect);
-
-//		device.getColorDist(rgbMat);
-
-//		device.getDepthWithDist(depthConvertedToShow);
-		device.getDepth(depthConvertedToShow);
-
-//		cv::imshow("rgb", rgbMat);
-
-//		depthFromKinect.convertTo(depthConvertedToShow, CV_8UC1, 255.0/2048.0);
-		cv::imshow("depth", depthConvertedToShow);
-//		cv::imshow("regularDepth", depthConvertedToShow);
-
-//		device.sendData(reinterpret_cast<TUByte*>(depthConvertedToShow.data),KINECT_FRAME_SIZE);
-
-//		device.sendData(c,15000);
-//		cv::imwrite("GrayImg.jpg",depthConvertedToShow);
-
-		device.sendKinectFrameUDP(
-				static_cast<TUByte*>(depthConvertedToShow.data),
-				CHUNK_SIZE,
-				KINECT_FRAME_SIZE);
-
-//		device.sendKinectFrameUDP(
-//				static_cast<TUByte*>(rgbMat.data),
-//				CHUNK_SIZE,
-//				KINECT_FRAME_SIZE*3);
-		++depthCounter;
-		if (abs(difftime(startTime, time(&currTime))) >= 1) //if time passed one sec
-				{
-
-			printf("I successfully sent (%d) frame at this second \n",depthCounter);
-			depthCounter = 0;
-//getchar();
-			startTime = time(NULL);
-		}
-
-
-//		getchar();
-//		sentData = fopen("sentData.bin","wb");
-//		fwrite(depthf.data,sizeof(char),KINECT_FRAME_SIZE,sentData);
-//		fclose(sentData);
-
-
-		char k = cvWaitKey(1);
-//		if (k == 27) {
-//			cvDestroyWindow("rgb");
-//			cvDestroyWindow("depth");
-//			break;
-//		}
-//		if (k == 8) {
-//			std::ostringstream file;
-//			file << filename << i_snap << suffix;
-//			cv::imwrite(file.str(), rgbMat);
-//			i_snap++;
-//		}
-//		if (iter >= 1000)
-//			break;
-//		iter++;
-	}
-
-	device.stopVideo();
-	device.stopDepth();
-	return 0;
-}
-
+#endif /* MYFREENECTDEVICE_H_ */
