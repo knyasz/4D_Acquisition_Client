@@ -1,9 +1,9 @@
 
-# Location of the CUDA Toolkit
-CUDA_PATH       ?= /usr/local/cuda-6.0
 
 OSUPPER = $(shell uname -s 2>/dev/null | tr "[:lower:]" "[:upper:]")
+#OSUPPER = LINUX
 OSLOWER = $(shell uname -s 2>/dev/null | tr "[:upper:]" "[:lower:]")
+#OSLOWER = linux
 
 OS_SIZE = $(shell uname -m | sed -e "s/i.86/32/" -e "s/x86_64/64/" -e "s/armv7l/32/")
 OS_ARCH = $(shell uname -m | sed -e "s/i386/i686/")
@@ -11,10 +11,6 @@ OS_ARCH = $(shell uname -m | sed -e "s/i386/i686/")
 #OS_SIZE = 32
 #OS_ARCH = armv7l
 
-DARWIN = $(strip $(findstring DARWIN, $(OSUPPER)))
-ifneq ($(DARWIN),)
-	XCODE_GE_5 = $(shell expr `xcodebuild -version | grep -i xcode | awk '{print $$2}' | cut -d'.' -f1` \>= 5)
-endif
 
 # Take command line flags that override any of these settings
 #ifeq ($(i386),1)
@@ -31,6 +27,10 @@ endif
 #endif
 
 # Common binaries
+DARWIN = $(strip $(findstring DARWIN, $(OSUPPER)))
+ifneq ($(DARWIN),)
+	XCODE_GE_5 = $(shell expr `xcodebuild -version | grep -i xcode | awk '{print $$2}' | cut -d'.' -f1` \>= 5)
+endif
 ifneq ($(DARWIN),)
 	ifeq ($(XCODE_GE_5),1)
 	  GCC ?= clang
@@ -41,6 +41,8 @@ else
   GCC ?= g++
 endif
 
+# Location of the CUDA Toolkit
+CUDA_PATH       ?= /usr/local/cuda-6.0
 NVCC := $(CUDA_PATH)/bin/nvcc -ccbin $(GCC)
 
 # internal flags
@@ -102,8 +104,11 @@ ALL_LDFLAGS += $(addprefix -Xlinker ,$(EXTRA_LDFLAGS))
 
 # Common includes and paths for CUDA
 INCLUDES  := -I../../common/inc -I/usr/local/include/libfreenect -I/usr/include/opencv  -I/usr/local/include/opencv
-#LIBRARIES := -L/usr/local/lib -lfreenect udpSocket.a -L/usr/local/lib -lopencv_core -lopencv_highgui -lopencv_imgproc -L/usr/local/cuda/lib -lcudart -lnpps -lnppi -lnppc -lcufft
-LIBRARIES := -L/usr/local/lib -lpthread -lfreenect udpSocket64bit.a -L/usr/local/lib -lopencv_core -lopencv_highgui -lopencv_imgproc -L/usr/local/cuda/lib64 -lcudart -lnpps -lnppi -lnppc -lcufft
+ifeq ($(OS_ARCH),armv7l)
+	LIBRARIES := -L/usr/local/lib -lfreenect udpSocket.a -L/usr/local/lib -lopencv_core -lopencv_highgui -lopencv_imgproc -L/usr/local/cuda/lib -lcudart -lnpps -lnppi -lnppc -lcufft
+else
+	LIBRARIES := -L/usr/local/lib -lfreenect udpSocket64bit.a -L/usr/local/lib -lopencv_core -lopencv_highgui -lopencv_imgproc -L/usr/local/cuda/lib64 -lcudart -lnpps -lnppi -lnppc -lcufft -lpthread
+endif
 ################################################################################
 
 # CUDA code generation flags
@@ -130,20 +135,30 @@ all:build
 build:test
 
 test.o:test.cpp
-#	$(NVCC) $(INCLUDES) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ -c $^ $(LIBRARIES)
-	g++ $(INCLUDES) -o $@ -c $< 
+ifeq ($(OS_ARCH),armv7l)
+	$(NVCC) $(INCLUDES) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ -c $^ $(LIBRARIES)
+else
+	g++ $(INCLUDES) -o $@ -c $<
+endif
 	
 dtmGpu.o:dtmGpu.cu
 	$(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $<
 	
 MyFreenectDevice.o:MyFreenectDevice.cpp
-#	$(NVCC) $(INCLUDES) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ -c $^ $(LIBRARIES)
-	g++ $(INCLUDES) -o $@ -c $< 
+ifeq ($(OS_ARCH),armv7l)
+	$(NVCC) $(INCLUDES) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ -c $^ $(LIBRARIES)
+else
+	g++ $(INCLUDES) -o $@ -c $<
+endif
+ 
 test:dtmGpu.o test.o MyFreenectDevice.o
-#	$(NVCC) $(INCLUDES) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES)
-#	mkdir -p ../../bin/$(OS_ARCH)/$(OSLOWER)/$(TARGET)$(if $(abi),/$(abi))
-#	cp $@ ../../bin/$(OS_ARCH)/$(OSLOWER)/$(TARGET)$(if $(abi),/$(abi))
+ifeq ($(OS_ARCH),armv7l)
+	$(NVCC) $(INCLUDES) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES)
+	mkdir -p ../../bin/$(OS_ARCH)/$(OSLOWER)/$(TARGET)$(if $(abi),/$(abi))
+	cp $@ ../../bin/$(OS_ARCH)/$(OSLOWER)/$(TARGET)$(if $(abi),/$(abi))
+else
 	g++ $(INCLUDES) -o $@ $^ $(LIBRARIES)
+endif
 
 run:build
 	./test
