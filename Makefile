@@ -41,7 +41,6 @@ else
   GCC ?= g++
 endif
 
-#INCLUDES  := -I../../common/inc -I/usr/local/include/libfreenect -I/usr/include/opencv  -I/usr/local/include/opencv
 INCLUDES  := -I/usr/local/include/libfreenect 
 LD_LIBS_LOCATION := -L/usr/local/lib
 LD_LIBS :=  -lfreenect  -lopencv_core -lopencv_highgui -lopencv_imgproc -lpthread
@@ -136,16 +135,20 @@ GENCODE_SMXX    := -gencode arch=compute_50,code=compute_50
 ifeq ($(OS_ARCH),armv7l)
 GENCODE_FLAGS   ?= $(GENCODE_SM32)
 else
-GENCODE_FLAGS   ?= $(GENCODE_SM10) $(GENCODE_SM20) $(GENCODE_SM30) $(GENCODE_SM32) $(GENCODE_SM35) $(GENCODE_SM50) $(GENCODE_SMXX)
+GENCODE_FLAGS   ?= $(GENCODE_SM10) \
+					$(GENCODE_SM20) \
+					$(GENCODE_SM30) \
+					$(GENCODE_SM32) \
+					$(GENCODE_SM35) \
+					$(GENCODE_SM50) \
+					$(GENCODE_SMXX)
 endif
 
 ################################################################################
 
 ifeq ($(OS_ARCH),armv7l)
-#	LIBRARIES := -L/usr/local/lib -lfreenect udpSocket.a -L/usr/local/lib -lopencv_core -lopencv_highgui -lopencv_imgproc -L/usr/local/cuda/lib -lcudart -lnpps -lnppi -lnppc -lcufft
 	UDP_SOCKET := udpSocket.a 
 else
-#	LIBRARIES := -L/usr/local/lib -lfreenect udpSocket64bit.a -L/usr/local/lib -lopencv_core -lopencv_highgui -lopencv_imgproc -L/usr/local/cuda/lib64 -lcudart -lnpps -lnppi -lnppc -lcufft -lpthread
 	UDP_SOCKET := udpSocket64bit.a 
 endif
 
@@ -155,38 +158,22 @@ all:build
 build:test
 
 test.o:test.cpp
-#ifeq ($(OS_ARCH),armv7l)
-#	$(NVCC) $(INCLUDES) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ -c $^ $(LIBRARIES)
 	$(NVCC) $(INCLUDES) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ -c $< $(LIBRARIES)
-#else
-#	g++ $(INCLUDES) -o $@ -c $< $(LIBRARIES)
-#endif
 	
 dtmGpu.o:dtmGpu.cu
-	$(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $<
+	$(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $< $(LIBRARIES)
 	
 MyFreenectDevice.o:MyFreenectDevice.cpp
-#ifeq ($(OS_ARCH),armv7l)
-#	$(NVCC) $(INCLUDES) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ -c $^ $(LIBRARIES)
 	$(NVCC) $(INCLUDES) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ -c $< $(LIBRARIES)
-#else
-#	g++ $(INCLUDES) -o $@ -c $<
-#endif
  
 test:dtmGpu.o test.o MyFreenectDevice.o $(UDP_SOCKET)
-#ifeq ($(OS_ARCH),armv7l)
-	$(NVCC) $(INCLUDES) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES) $(UDP_SOCKET)
-#	mkdir -p ../../bin/$(OS_ARCH)/$(OSLOWER)/$(TARGET)$(if $(abi),/$(abi))
-#	cp $@ ../../bin/$(OS_ARCH)/$(OSLOWER)/$(TARGET)$(if $(abi),/$(abi))
-#else
-#	g++ $(INCLUDES) -o $@ $^ $(LIBRARIES)
-#endif
+	$(NVCC) $(INCLUDES) $(ALL_LDFLAGS) $(GENCODE_FLAGS) \
+		 -o $@ $+ $(LIBRARIES) $(UDP_SOCKET)
 
 run:build
 	./test
 
 clean:
 	rm -f test *.o 
-#	rm -rf /bin/$(OS_ARCH)/$(OSLOWER)/$(TARGET)$(if $(abi),/$(abi))/test
 clobber:clean
 
