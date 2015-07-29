@@ -41,9 +41,28 @@ else
   GCC ?= g++
 endif
 
+#INCLUDES  := -I../../common/inc -I/usr/local/include/libfreenect -I/usr/include/opencv  -I/usr/local/include/opencv
+INCLUDES  := -I/usr/local/include/libfreenect 
+LD_LIBS_LOCATION := -L/usr/local/lib
+LD_LIBS :=  -lfreenect  -lopencv_core -lopencv_highgui -lopencv_imgproc -lpthread
+LIBRARIES := $(LD_LIBS_LOCATION) $(LD_LIBS) \
+
+
 # Location of the CUDA Toolkit
 CUDA_PATH       ?= /usr/local/cuda-6.0
 NVCC := $(CUDA_PATH)/bin/nvcc -ccbin $(GCC)
+
+# Common includes and paths for CUDA
+INCLUDES += -I/usr/local/include/opencv
+ifeq ($(OS_ARCH),armv7l)
+	LD_CUDALIBS_LOCATION := -L/usr/local/cuda/lib
+else
+	LD_CUDALIBS_LOCATION := -L/usr/local/cuda/lib64
+endif
+LD_CUDALIBS := -lcudart -lnpps -lnppi -lnppc -lcufft
+LIBRARIES += $(LD_CUDALIBS_LOCATION) $(LD_CUDALIBS) 
+
+
 
 # internal flags
 NVCCFLAGS   := -m${OS_SIZE}
@@ -82,7 +101,6 @@ LDFLAGS += -rpath-link=$(TARGET_FS)/usr/lib
 LDFLAGS += -rpath-link=$(TARGET_FS)/usr/lib/arm-linux-$(abi)
 endif
 
-
 # Debug build flags
 ifeq ($(dbg),1)
       NVCCFLAGS += -g -G
@@ -102,13 +120,7 @@ ALL_LDFLAGS += $(ALL_CCFLAGS)
 ALL_LDFLAGS += $(addprefix -Xlinker ,$(LDFLAGS))
 ALL_LDFLAGS += $(addprefix -Xlinker ,$(EXTRA_LDFLAGS))
 
-# Common includes and paths for CUDA
-INCLUDES  := -I../../common/inc -I/usr/local/include/libfreenect -I/usr/include/opencv  -I/usr/local/include/opencv
-ifeq ($(OS_ARCH),armv7l)
-	LIBRARIES := -L/usr/local/lib -lfreenect udpSocket.a -L/usr/local/lib -lopencv_core -lopencv_highgui -lopencv_imgproc -L/usr/local/cuda/lib -lcudart -lnpps -lnppi -lnppc -lcufft
-else
-	LIBRARIES := -L/usr/local/lib -lfreenect udpSocket64bit.a -L/usr/local/lib -lopencv_core -lopencv_highgui -lopencv_imgproc -L/usr/local/cuda/lib64 -lcudart -lnpps -lnppi -lnppc -lcufft -lpthread
-endif
+
 ################################################################################
 
 # CUDA code generation flags
@@ -129,42 +141,52 @@ endif
 
 ################################################################################
 
+ifeq ($(OS_ARCH),armv7l)
+#	LIBRARIES := -L/usr/local/lib -lfreenect udpSocket.a -L/usr/local/lib -lopencv_core -lopencv_highgui -lopencv_imgproc -L/usr/local/cuda/lib -lcudart -lnpps -lnppi -lnppc -lcufft
+	UDP_SOCKET := udpSocket.a 
+else
+#	LIBRARIES := -L/usr/local/lib -lfreenect udpSocket64bit.a -L/usr/local/lib -lopencv_core -lopencv_highgui -lopencv_imgproc -L/usr/local/cuda/lib64 -lcudart -lnpps -lnppi -lnppc -lcufft -lpthread
+	UDP_SOCKET := udpSocket64bit.a 
+endif
+
 # Target rules
 all:build
 
 build:test
 
 test.o:test.cpp
-ifeq ($(OS_ARCH),armv7l)
-	$(NVCC) $(INCLUDES) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ -c $^ $(LIBRARIES)
-else
-	g++ $(INCLUDES) -o $@ -c $<
-endif
+#ifeq ($(OS_ARCH),armv7l)
+#	$(NVCC) $(INCLUDES) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ -c $^ $(LIBRARIES)
+	$(NVCC) $(INCLUDES) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ -c $< $(LIBRARIES)
+#else
+#	g++ $(INCLUDES) -o $@ -c $< $(LIBRARIES)
+#endif
 	
 dtmGpu.o:dtmGpu.cu
 	$(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $<
 	
 MyFreenectDevice.o:MyFreenectDevice.cpp
-ifeq ($(OS_ARCH),armv7l)
-	$(NVCC) $(INCLUDES) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ -c $^ $(LIBRARIES)
-else
-	g++ $(INCLUDES) -o $@ -c $<
-endif
+#ifeq ($(OS_ARCH),armv7l)
+#	$(NVCC) $(INCLUDES) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ -c $^ $(LIBRARIES)
+	$(NVCC) $(INCLUDES) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ -c $< $(LIBRARIES)
+#else
+#	g++ $(INCLUDES) -o $@ -c $<
+#endif
  
-test:dtmGpu.o test.o MyFreenectDevice.o
-ifeq ($(OS_ARCH),armv7l)
-	$(NVCC) $(INCLUDES) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES)
-	mkdir -p ../../bin/$(OS_ARCH)/$(OSLOWER)/$(TARGET)$(if $(abi),/$(abi))
-	cp $@ ../../bin/$(OS_ARCH)/$(OSLOWER)/$(TARGET)$(if $(abi),/$(abi))
-else
-	g++ $(INCLUDES) -o $@ $^ $(LIBRARIES)
-endif
+test:dtmGpu.o test.o MyFreenectDevice.o $(UDP_SOCKET)
+#ifeq ($(OS_ARCH),armv7l)
+	$(NVCC) $(INCLUDES) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES) $(UDP_SOCKET)
+#	mkdir -p ../../bin/$(OS_ARCH)/$(OSLOWER)/$(TARGET)$(if $(abi),/$(abi))
+#	cp $@ ../../bin/$(OS_ARCH)/$(OSLOWER)/$(TARGET)$(if $(abi),/$(abi))
+#else
+#	g++ $(INCLUDES) -o $@ $^ $(LIBRARIES)
+#endif
 
 run:build
 	./test
 
 clean:
 	rm -f test *.o 
-	rm -rf /bin/$(OS_ARCH)/$(OSLOWER)/$(TARGET)$(if $(abi),/$(abi))/test
+#	rm -rf /bin/$(OS_ARCH)/$(OSLOWER)/$(TARGET)$(if $(abi),/$(abi))/test
 clobber:clean
 
