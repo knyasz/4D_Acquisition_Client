@@ -158,13 +158,13 @@ all:build
 build:test
 
 test.o:test.cpp
-	$(NVCC) $(INCLUDES) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ -c $< $(LIBRARIES)
+	$(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $< $(LIBRARIES)
 	
 dtmGpu.o:dtmGpu.cu
 	$(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $< $(LIBRARIES)
 	
 MyFreenectDevice.o:MyFreenectDevice.cpp
-	$(NVCC) $(INCLUDES) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ -c $< $(LIBRARIES)
+	$(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $< $(LIBRARIES)
  
 test:dtmGpu.o test.o MyFreenectDevice.o $(UDP_SOCKET)
 	$(NVCC) $(INCLUDES) $(ALL_LDFLAGS) $(GENCODE_FLAGS) \
