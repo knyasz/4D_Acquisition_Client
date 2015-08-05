@@ -10,7 +10,7 @@
 
 #include <libfreenect.hpp>
 
-#include <pthread.h>
+
 #include <cv.h>
 #include <cxcore.h>
 #include <highgui.h>
@@ -20,30 +20,16 @@
 #include "math.h"
 
 #include "udpSocket.h"
-//#include "udpSocket64bit.a"
 #include "dtm.h"
+#include "MyMutex.h"
 
 using namespace cv;
 using namespace std;
 
 using namespace NUdpSocket;
 
-#define __CPU_VERSION__
 
-class myMutex {
-public:
-	myMutex() {
-		pthread_mutex_init(&m_mutex, NULL);
-	}
-	void lock() {
-		pthread_mutex_lock(&m_mutex);
-	}
-	void unlock() {
-		pthread_mutex_unlock(&m_mutex);
-	}
-private:
-	pthread_mutex_t m_mutex;
-};
+
 
 static const TUDWord CHUNK_SIZE(60000); //60k byte
 static const TUDWord DELAY_SEND(6000); //U SEC
@@ -83,8 +69,8 @@ private:
 	Mat depthMat;
 	Mat rgbMat;
 	Mat ownMat;
-	myMutex m_rgb_mutex;
-	myMutex m_depth_mutex;
+	MyMutex m_rgb_mutex;
+	MyMutex m_depth_mutex;
 	bool m_new_rgb_frame;
 	bool m_new_depth_frame;
 	CUdpSocket m_udpSocket;

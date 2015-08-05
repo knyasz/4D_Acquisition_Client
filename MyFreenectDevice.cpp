@@ -76,79 +76,84 @@ bool MyFreenectDevice::getVideo(Mat& output) {
 }
 
 bool MyFreenectDevice::getDepthWithDist(Mat& output) {
-//		Mat dtmMat(Size(640, 480), CV_16UC1);
-//		float ms1, ms2;
-//		static float totalmsg(0.f),totalmsc(0.f);
-//		static uint32 count(0);
-//		m_depth_mutex.lock();
-//		if (m_new_depth_frame) {
-//#ifdef __CPU_VERSION__
-//			ms1 = dtmCpu(reinterpret_cast<uint16*>(depthMat.data),
-//					reinterpret_cast<uint16*>(dtmMat.data), 2, 2.5);
-//			//printf("The Cpu version took me %f millisecond\n", ms1);
-//			ms2 = dtmGpu(depthMat.data, dtmMat.data, KINECT_ROWS, KINECT_COLS,
-//					2, 2.5);
-//			totalmsg += ms2;
-//			totalmsc += ms1;
-//			++count;
-//			if (count == 100)
-//			{
-//		   		printf("average time to perform from gpu is: %lf and cpu is: %lf\n the gpu is x%lf faster the cpu\n",
-//		   				totalmsg/(float)count, totalmsc/(float)count,totalmsc/totalmsg);
-//				totalmsg = 0.f;
-//				totalmsc = 0.f;
-//				count = 0;
-//				//getchar();
-//
-//			}SSocketConfigifeq ($(OS_ARCH),armv7l)
-//
-//			//printf("the Gpu version took me millisecond %fl\n", ms2);
-//#else
-//			dtmGpu(depthMat.data,dtmMat.data,KINECT_ROWS,KINECT_COLS,1,2);
-//#endif
-//			dtmMat.convertTo(output, CV_8UC1, 255.0 / 2048.0);
-//			m_new_depth_frame = false;
-//			m_depth_mutex.unlock();
-//			return true;
-//		}
-//		m_depth_mutex.unlock();
+		Mat dtmMat(Size(640, 480), CV_16UC1);
+		float ms1, ms2;
+		static float totalmsg(0.f),totalmsc(0.f);
+		static uint32 count(0);
+		m_depth_mutex.lock();
+		if (m_new_depth_frame) {
+#ifdef __CPU_VERSION__
+			ms1 = dtmCpu(reinterpret_cast<uint16*>(depthMat.data),
+					reinterpret_cast<uint16*>(dtmMat.data), 2, 2.5);
+			//printf("The Cpu version took me %f millisecond\n", ms1);
+			ms2 = dtmGpu(depthMat.data, dtmMat.data, KINECT_ROWS, KINECT_COLS,
+					2, 2.5);
+			totalmsg += ms2;
+			totalmsc += ms1;
+			++count;
+			if (count == 100){
+		   		printf("average time to perform from gpu is: %lf and cpu is: %lf\n the gpu is x%lf faster the cpu\n",
+		   				totalmsg/(float)count, totalmsc/(float)count,totalmsc/totalmsg);
+				totalmsg = 0.f;
+				totalmsc = 0.f;
+				count = 0;
+				//getchar();
+
+			}
+			SSocketConfigifeq ($(OS_ARCH),armv7l)
+
+			//printf("the Gpu version took me millisecond %fl\n", ms2);
+#else
+			dtmGpu(depthMat.data,dtmMat.data,KINECT_ROWS,KINECT_COLS,1,2);
+#endif
+			dtmMat.convertTo(output, CV_8UC1, 255.0 / 2048.0);
+			m_new_depth_frame = false;
+			m_depth_mutex.unlock();
+			return true;
+		}
+		m_depth_mutex.unlock();
 	return false;
 }
 
 bool MyFreenectDevice::getWorldDataColor(Mat& output) {
-//		Mat dtmMat(Size(640, 480), CV_16UC1);
-//		static Mat rotMat(Size(4, 4), CV_64F);
-//		static Mat transMat(Size(4, 4), CV_64F);
-//		static Mat final(Size(4, 4), CV_64F);
-//		bool first(true);
-//
-//		if (first) {
-//			double rot[] = { 9.9984628826577793e-01f, -1.4779096108364480e-03f,
-//					1.7470421412464927e-02f, 0, 1.2635359098409581e-03f,
-//					9.9992385683542895e-01f, -1.2251380107679535e-02f, 0,
-//					1.7470421412464927e-02f, 1.2275341476520762e-02f,
-//					9.9977202419716948e-01f, 0, 0, 0, 0, 1 };
-//			double trans[] = { 0, 0, 0, 1.9985242312092553e-02f, 0, 0, 0,
-//					-7.4423738761617583e-04f, 0, 0, 0, -1.0916736334336222e-02f,
-//					0, 0, 0, 1 };
-//			rotMat.data = (uchar*) rot;
-//			transMat.data = (uchar*) trans;
-//			cv::multiply(rotMat, transMat, final);
-//			first = false;
-//		}
-//
-//		m_depth_mutex.lock();
-//		if (m_new_depth_frame) {
-//
-//			depthToRgbWorldPoint(depthMat.data,
-//					reinterpret_cast<float*>(final.data), dtmMat.data,
-//					KINECT_ROWS, KINECT_COLS, 2, 2.5);
-//			dtmMat.convertTo(output, CV_8UC1, 255.0 / 2048.0);
-//			m_new_depth_frame = false;
-//			m_depth_mutex.unlock();
-//			return true;
-//		}
-//		m_depth_mutex.unlock();
+		Mat dtmMat(Size(640, 480), CV_16UC1);
+		static Mat rotMat(Size(4, 4), CV_64F);
+		static Mat transMat(Size(4, 4), CV_64F);
+		static Mat final(Size(4, 4), CV_64F);
+		bool first(true);
+
+		if (first) {
+			double rot[] = { 9.9984628826577793e-01f, -1.4779096108364480e-03f,
+					1.7470421412464927e-02f, 0, 1.2635359098409581e-03f,
+					9.9992385683542895e-01f, -1.2251380107679535e-02f, 0,
+					1.7470421412464927e-02f, 1.2275341476520762e-02f,
+					9.9977202419716948e-01f, 0, 0, 0, 0, 1 };
+			double trans[] = { 0, 0, 0, 1.9985242312092553e-02f, 0, 0, 0,
+					-7.4423738761617583e-04f, 0, 0, 0, -1.0916736334336222e-02f,
+					0, 0, 0, 1 };
+			rotMat.data = (uchar*) rot;
+			transMat.data = (uchar*) trans;
+			cv::multiply(rotMat, transMat, final);
+			first = false;
+		}
+
+		m_depth_mutex.lock();
+		if (m_new_depth_frame) {
+
+			depthToRgbWorldPoint(
+					depthMat.data,
+					reinterpret_cast<float*>(final.data),
+					dtmMat.data,
+					KINECT_ROWS,
+					KINECT_COLS,
+					2,
+					2.5);
+			dtmMat.convertTo(output, CV_8UC1, 255.0 / 2048.0);
+			m_new_depth_frame = false;
+			m_depth_mutex.unlock();
+			return true;
+		}
+		m_depth_mutex.unlock();
 	return false;
 
 }
@@ -198,20 +203,20 @@ bool MyFreenectDevice::getDepth(Mat& output) {
 }
 
 bool MyFreenectDevice::getColorDist(Mat& output) {
-//		Mat dtmMat(Size(640, 480), CV_8UC3);
-//		m_depth_mutex.lock();
-//		m_rgb_mutex.lock();
-//		if (m_new_depth_frame) {
-//			cv::cvtColor(rgbMat, output, CV_RGB2BGR);
-//			dtmGpuColor(reinterpret_cast<uint16*>(depthMat.data), output.data,
-//					output.data, KINECT_ROWS, KINECT_COLS, 2, 2.5, 3);
-//			m_new_depth_frame = false;
-//			m_depth_mutex.unlock();
-//			m_rgb_mutex.unlock();
-//			return true;
-//		}
-//		m_depth_mutex.unlock();
-//		m_rgb_mutex.unlock();
+		Mat dtmMat(Size(640, 480), CV_8UC3);
+		m_depth_mutex.lock();
+		m_rgb_mutex.lock();
+		if (m_new_depth_frame) {
+			cv::cvtColor(rgbMat, output, CV_RGB2BGR);
+			dtmGpuColor(reinterpret_cast<uint16*>(depthMat.data), output.data,
+					output.data, KINECT_ROWS, KINECT_COLS, 2, 2.5, 3);
+			m_new_depth_frame = false;
+			m_depth_mutex.unlock();
+			m_rgb_mutex.unlock();
+			return true;
+		}
+		m_depth_mutex.unlock();
+		m_rgb_mutex.unlock();
 	return false;
 }
 
@@ -248,7 +253,7 @@ bool MyFreenectDevice::sendKinectFrameUDP(	TUByte* buffer,
 			bytesLeft -= currChunk;
 			buffIndex += currChunk;
 			//printf("Sent pack (%d) a chunck of (%d) bytes \n theres (%d) data left \n",packet,currChunk,bytesLeft);
-//getchar();
+			//getchar();
 		} else {
 			printf("Couldnt Send the data\n");
 			status = false;

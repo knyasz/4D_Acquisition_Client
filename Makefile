@@ -165,9 +165,12 @@ dtmGpu.o:dtmGpu.cu
 	
 MyFreenectDevice.o:MyFreenectDevice.cpp
 	$(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $< $(LIBRARIES)
+	
+MyMutex.o:MyMutex.cpp
+	$(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $< $(LIBRARIES)
  
-test:dtmGpu.o test.o MyFreenectDevice.o $(UDP_SOCKET)
-	$(NVCC) $(INCLUDES) $(ALL_LDFLAGS) $(GENCODE_FLAGS) \
+test:dtmGpu.o test.o MyFreenectDevice.o MyMutex.o $(UDP_SOCKET)
+	$(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) \
 		 -o $@ $+ $(LIBRARIES) $(UDP_SOCKET)
 
 run:build
