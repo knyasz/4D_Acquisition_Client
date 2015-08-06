@@ -201,6 +201,16 @@ bool MyFreenectDevice::getDepth(Mat& output) {
 	m_depth_mutex.unlock();
 	return false;
 }
+bool MyFreenectDevice::IsFrameReady(){
+	m_depth_mutex.lock();
+	if(m_new_depth_frame) {
+		m_new_depth_frame = false;
+		m_depth_mutex.unlock();
+		return true;
+	}
+	m_depth_mutex.unlock();
+	return false;
+}
 
 bool MyFreenectDevice::getColorDist(Mat& output) {
 		Mat dtmMat(Size(640, 480), CV_8UC3);

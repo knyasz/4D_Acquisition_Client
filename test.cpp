@@ -60,18 +60,31 @@ int main(int argc, char **argv) {
 	device.startDepth();
 	time(&startTime);
 	while (!die) {
+		{// stream depth
+			while(!device.getDepth(depthConvertedToShow)){;}
+//			cv::imshow("depth", depthConvertedToShow);
+			device.sendKinectFrameUDP(
+							static_cast<TUByte*>(depthConvertedToShow.data),
+							CHUNK_SIZE,
+							KINECT_FRAME_SIZE);
+		}
+		/*
+		{// Get frames only test = 30 FPS :)
+			while (!device.IsFrameReady()){}
+		}
+		*/
 //		device.getVideo(rgbMat);
 //		device.getDepth(depthFromKinect);
 
 //		device.getColorDist(rgbMat);
 
 //		device.getDepthWithDist(depthConvertedToShow);
-		device.getDepth(depthConvertedToShow);
+//		device.getDepth(depthConvertedToShow);
 
 //		cv::imshow("rgb", rgbMat);
 
 //		depthFromKinect.convertTo(depthConvertedToShow, CV_8UC1, 255.0/2048.0);
-		cv::imshow("depth", depthConvertedToShow);
+//		cv::imshow("depth", depthConvertedToShow);
 //		cv::imshow("regularDepth", depthConvertedToShow);
 
 //		device.sendData(reinterpret_cast<TUByte*>(depthConvertedToShow.data),KINECT_FRAME_SIZE);
@@ -79,22 +92,21 @@ int main(int argc, char **argv) {
 //		device.sendData(c,15000);
 //		cv::imwrite("GrayImg.jpg",depthConvertedToShow);
 
-		device.sendKinectFrameUDP(
-				static_cast<TUByte*>(depthConvertedToShow.data),
-				CHUNK_SIZE,
-				KINECT_FRAME_SIZE);
+//		device.sendKinectFrameUDP(
+//				static_cast<TUByte*>(depthConvertedToShow.data),
+//				CHUNK_SIZE,
+//				KINECT_FRAME_SIZE);
 
 //		device.sendKinectFrameUDP(
 //				static_cast<TUByte*>(rgbMat.data),
 //				CHUNK_SIZE,
 //				KINECT_FRAME_SIZE*3);
-		++depthCounter;
-		if (abs(difftime(startTime, time(&currTime))) >= 1) //if time passed one sec
-				{
 
-			printf("I successfully sent (%d) frame at this second \n",depthCounter);
+		++depthCounter;
+		if (abs(difftime(startTime, time(&currTime))) >= 1){ //if time passed one sec
+			printf("I successfully sent (%d) frame at this second \n",
+					depthCounter);
 			depthCounter = 0;
-//getchar();
 			startTime = time(NULL);
 		}
 
