@@ -257,7 +257,7 @@ bool MyFreenectDevice::sendKinectFrameUDP(	TUByte* buffer,
 		TUDWord currChunk(
 				(bytesLeft - (TSDWord) chunkSize) > 0 ?
 						chunkSize : bytesLeft);
-		usleep(DELAY_SEND);
+//		usleep(DELAY_SEND);
 		if (sendData(buffer + buffIndex, currChunk)) {
 			++packet;
 			bytesLeft -= currChunk;

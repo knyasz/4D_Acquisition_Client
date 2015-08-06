@@ -63,10 +63,10 @@ int main(int argc, char **argv) {
 		{// stream depth
 			while(!device.getDepth(depthConvertedToShow)){;}
 //			cv::imshow("depth", depthConvertedToShow);
-			device.sendKinectFrameUDP(
-							static_cast<TUByte*>(depthConvertedToShow.data),
-							CHUNK_SIZE,
-							KINECT_FRAME_SIZE);
+			while(!device.sendKinectFrameUDP(
+					static_cast<TUByte*>(depthConvertedToShow.data),
+					CHUNK_SIZE,
+					KINECT_FRAME_SIZE)){;}
 		}
 		/*
 		{// Get frames only test = 30 FPS :)
