@@ -50,7 +50,7 @@ int main(int argc, char **argv) {
 //	printf("the size of the color matrix "
 //			"is %d just as rows*cols*sizeofchar*3channels %d",
 //			rgbMat.rows*rgbMat.cols*rgbMat.elemSize(),640*480*sizeof(uchar)*3);
-	device.InitSocket();
+	device.InitDepthUdpSocket();
 
 	namedWindow("rgb", CV_WINDOW_AUTOSIZE);
 	namedWindow("depth", CV_WINDOW_AUTOSIZE);
@@ -77,7 +77,8 @@ int main(int argc, char **argv) {
 			while(!device.sendKinectFrameUDP(
 					static_cast<TUByte*>(depthConvertedToShow.data),
 					CHUNK_SIZE,
-					KINECT_FRAME_SIZE)){;}
+					KINECT_FRAME_SIZE,
+					DEPTH)){;}
 		}
 
 
@@ -100,7 +101,8 @@ int main(int argc, char **argv) {
 			device.sendKinectFrameUDP(
 					static_cast<TUByte*>(rgbMat.data),
 					CHUNK_SIZE,
-					KINECT_FRAME_SIZE*3);
+					KINECT_FRAME_SIZE*3,
+					RGB);
 		}
 
 
@@ -127,13 +129,13 @@ int main(int argc, char **argv) {
 //				KINECT_FRAME_SIZE);
 
 
-		++depthCounter;
-		if (abs(difftime(startTime, time(&currTime))) >= 1){ //if time passed one sec
-			printf("I successfully sent (%d) frame at this second \n",
-					depthCounter);
-			depthCounter = 0;
-			startTime = time(NULL);
-		}
+//		++depthCounter;
+//		if (abs(difftime(startTime, time(&currTime))) >= 1){ //if time passed one sec
+//			printf("I successfully sent (%d) frame at this second \n",
+//					depthCounter);
+//			depthCounter = 0;
+//			startTime = time(NULL);
+//		}
 
 
 //		getchar();

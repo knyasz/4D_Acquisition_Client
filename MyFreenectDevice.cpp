@@ -26,8 +26,17 @@ MyFreenectDevice::MyFreenectDevice(freenect_context *_ctx, int _index) :
 		m_new_rgb_frame(false),
 		m_new_depth_frame(false),
 		depthMat(Size(640, 480), CV_16UC1),
+		depth_window_name("depth"),
 		rgbMat(Size(640, 480), CV_8UC3,	Scalar(0)),
-		ownMat(Size(640, 480), CV_8UC3, Scalar(0)) {
+		rgb_window_name("rgb"),
+
+		ownMat(Size(640, 480), CV_8UC3, Scalar(0)){
+
+	namedWindow(depth_window_name, CV_WINDOW_AUTOSIZE);
+	startVideo();
+	namedWindow(rgb_window_name, CV_WINDOW_AUTOSIZE);
+	startDepth();
+
 	for (unsigned int i = 0; i < 2048; i++) {
 		float v = i / 2048.0;
 		v = std::pow(v, 3) * 6;
@@ -75,16 +84,16 @@ bool MyFreenectDevice::getVideo(Mat& output) {
 }
 
 bool MyFreenectDevice::getDepth(Mat& output) {
+	bool result = false;
 	m_depth_mutex.lock();
 	if(m_new_depth_frame) {
 		depthMat.convertTo(output, CV_8UC1, 255.0/2048.0);
 		//depthMat.copyTo(output);
 		m_new_depth_frame = false;
-		m_depth_mutex.unlock();
-		return true;
+		result =  true;
 	}
 	m_depth_mutex.unlock();
-	return false;
+	return result;
 }
 bool MyFreenectDevice::IsDepthFrameReadyDrop(){
 	m_depth_mutex.lock();
@@ -229,7 +238,7 @@ bool MyFreenectDevice::getColorDist(Mat& output) {
 	return false;
 }
 
-bool MyFreenectDevice::InitSocket() {
+bool MyFreenectDevice::InitDepthUdpSocket() {
 	bool rv(true);
 	SSocketConfig conf(	"10.0.0.2",
 						"10.0.0.1",
@@ -238,15 +247,30 @@ bool MyFreenectDevice::InitSocket() {
 						KINECT_FRAME_SIZE,
 						"IR Video Img");
 
-	rv = rv && m_udpSocket.configureSocket(conf);
-	rv = rv && m_udpSocket.openSocket();
+	rv = rv && m_udp_depth_socket.configureSocket(conf);
+	rv = rv && m_udp_depth_socket.openSocket();
+
+	return rv;
+}
+bool MyFreenectDevice::InitRgbUdpSocket() {
+	bool rv(true);
+	SSocketConfig conf(	"10.0.0.2",
+						"10.0.0.1",
+						70777,
+						70777,
+						KINECT_FRAME_SIZE,
+						"IR Video Img");
+
+	rv = rv && m_udp_rgb_socket.configureSocket(conf);
+	rv = rv && m_udp_rgb_socket.openSocket();
 
 	return rv;
 }
 
 bool MyFreenectDevice::sendKinectFrameUDP(	TUByte* buffer,
 											TUDWord chunkSize,
-											const TUDWord totSize) {
+											const TUDWord totSize,
+											TFrame frameType) {
 	bool rv(false), status(true);
 	TSDWord bytesLeft(totSize);
 	TUDWord buffIndex(0);
@@ -257,7 +281,7 @@ bool MyFreenectDevice::sendKinectFrameUDP(	TUByte* buffer,
 				(bytesLeft - (TSDWord) chunkSize) > 0 ?
 						chunkSize : bytesLeft);
 //		usleep(DELAY_SEND);
-		if (sendData(buffer + buffIndex, currChunk)) {
+		if (sendData(buffer + buffIndex, currChunk, frameType)) {
 			++packet;
 			bytesLeft -= currChunk;
 			buffIndex += currChunk;
@@ -278,3 +302,117 @@ bool MyFreenectDevice::sendKinectFrameUDP(	TUByte* buffer,
 	return rv;
 
 }
+
+void MyFreenectDevice::allocateAndSendFrame (TFrame frameType){
+	Mat * pMat;
+	CUdpSocket *pSocket;
+	if (frameType == DEPTH){
+		pMat = new Mat(Size(640, 480), CV_16UC1);
+		while (!getDepth(*pMat)){;}
+		pSocket= &m_udp_depth_socket;
+	}else{
+		pMat = new Mat(Size(640, 480), CV_8UC3,	Scalar(0));
+		while (!getVideo(*pMat)){;}
+		pSocket = &m_udp_rgb_socket;
+	}
+	if ((!pSocket->isConfiguref())){
+		InitSocket(frameType);
+	}
+	//NEVER push to pipe before sending !!!
+	while(!sendKinectFrameUDP(static_cast<TUByte*>(pMat->data),
+								CHUNK_SIZE,
+								KINECT_FRAME_SIZE,
+								frameType)){;}
+	if (frameType == DEPTH){
+		pushDepthPipe(pMat);
+	}else{
+		pushRgbPipe(pMat);
+	}
+
+}
+void MyFreenectDevice::showAndDeallocateFrame(TFrame frameType){
+	Mat * frameToShow;
+	if(frameType == DEPTH){
+		while(!popDepthPipeSucessfully(&frameToShow)){;}
+		cv::imshow(depth_window_name, *frameToShow);
+		/*
+		 * A common mistake for opencv newcomers
+		 * is to call cv::imshow() in a loop through video frames,
+		 * without following up each draw with cv::waitKey(30).
+		 * In this case, nothing appears on screen,
+		 * because highgui is never given time
+		 * to process the draw requests from cv::imshow()
+		 */
+		cvWaitKey(1);
+	}else if(frameType == RGB){
+		while(!popRgbPipeSucessfully(&frameToShow)){;}
+		cv::imshow(rgb_window_name, *frameToShow);
+		/*
+		 * A common mistake for opencv newcomers
+		 * is to call cv::imshow() in a loop through video frames,
+		 * without following up each draw with cv::waitKey(30).
+		 * In this case, nothing appears on screen,
+		 * because highgui is never given time
+		 * to process the draw requests from cv::imshow()
+		 */
+		cvWaitKey(1);
+	}
+	delete frameToShow;
+}
+
+
+void MyFreenectDevice::pushDepthPipe(Mat * pMat){
+	m_depth_pipe_mutex.lock();
+		if (m_depth_pipe.size()>PIPE_LENGTH){
+			m_depth_pipe.push(pMat);
+		}else{
+			delete pMat;
+		}
+	m_depth_pipe_mutex.unlock();
+}
+void MyFreenectDevice::pushRgbPipe(Mat * pMat){
+	m_RGB_pipe_mutex.lock();
+		if (m_RGB_pipe.size()>PIPE_LENGTH){
+			m_RGB_pipe.push(pMat);
+		}else{
+			delete pMat;
+		}
+	m_RGB_pipe_mutex.unlock();
+}
+
+bool MyFreenectDevice::popDepthPipeSucessfully(Mat ** ppMat){
+	m_depth_pipe_mutex.lock();
+		if (m_depth_pipe.empty()){
+			m_depth_pipe_mutex.unlock();
+			return false;
+		}
+		*ppMat= m_depth_pipe.back();
+		m_depth_pipe.pop();
+	m_depth_pipe_mutex.unlock();
+	return true;
+}
+bool MyFreenectDevice::popRgbPipeSucessfully(Mat ** ppMat){
+	m_RGB_pipe_mutex.lock();
+		if (m_RGB_pipe.empty()){
+			m_RGB_pipe_mutex.unlock();
+			return false;
+		}
+		*ppMat= m_RGB_pipe.back();
+		m_RGB_pipe.pop();
+	m_RGB_pipe_mutex.unlock();
+	return true;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
