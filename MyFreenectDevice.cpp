@@ -51,14 +51,14 @@ void MyFreenectDevice::DepthCallback(void* _depth, uint32_t timestamp) {
 	depthMat.data = (uchar*) depth;
 
 	m_new_depth_frame = true;
-	++countGlobal;
-	if (abs(difftime(startTime, time(NULL))) >= 1) //if time passed one sec
-			{
-		//printf("I successfully sent (%d) frame at this second \n",countGlobal);
-		countGlobal = 0;
-		//getchar();
-		startTime = time(NULL);
-	}
+//	++countGlobal;
+//	if (abs(difftime(startTime, time(NULL))) >= 1) //if time passed one sec
+//			{
+//		//printf("I successfully sent (%d) frame at this second \n",countGlobal);
+//		countGlobal = 0;
+//		//getchar();
+//		startTime = time(NULL);
+//	}
 	m_depth_mutex.unlock();
 }
 
@@ -69,10 +69,32 @@ bool MyFreenectDevice::getVideo(Mat& output) {
 		m_new_rgb_frame = false;
 		m_rgb_mutex.unlock();
 		return true;
-	} else {
-		m_rgb_mutex.unlock();
-		return false;
 	}
+	m_rgb_mutex.unlock();
+	return false;
+}
+
+bool MyFreenectDevice::getDepth(Mat& output) {
+	m_depth_mutex.lock();
+	if(m_new_depth_frame) {
+		depthMat.convertTo(output, CV_8UC1, 255.0/2048.0);
+		//depthMat.copyTo(output);
+		m_new_depth_frame = false;
+		m_depth_mutex.unlock();
+		return true;
+	}
+	m_depth_mutex.unlock();
+	return false;
+}
+bool MyFreenectDevice::IsDepthFrameReadyDrop(){
+	m_depth_mutex.lock();
+	if(m_new_depth_frame) {
+		m_new_depth_frame = false;
+		m_depth_mutex.unlock();
+		return true;
+	}
+	m_depth_mutex.unlock();
+	return false;
 }
 
 bool MyFreenectDevice::getDepthWithDist(Mat& output) {
@@ -187,29 +209,6 @@ float MyFreenectDevice::dtmCpu(uint16* inMat, uint16* outMat, uchar minRange,uch
 	miliseconds = (float) ((((float) end - (float) start) / 1000000.f)
 			* 1000.f);
 	return miliseconds;
-}
-
-bool MyFreenectDevice::getDepth(Mat& output) {
-	m_depth_mutex.lock();
-	if(m_new_depth_frame) {
-		depthMat.convertTo(output, CV_8UC1, 255.0/2048.0);
-		//depthMat.copyTo(output);
-		m_new_depth_frame = false;
-		m_depth_mutex.unlock();
-		return true;
-	}
-	m_depth_mutex.unlock();
-	return false;
-}
-bool MyFreenectDevice::IsFrameReady(){
-	m_depth_mutex.lock();
-	if(m_new_depth_frame) {
-		m_new_depth_frame = false;
-		m_depth_mutex.unlock();
-		return true;
-	}
-	m_depth_mutex.unlock();
-	return false;
 }
 
 bool MyFreenectDevice::getColorDist(Mat& output) {

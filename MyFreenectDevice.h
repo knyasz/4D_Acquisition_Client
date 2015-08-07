@@ -50,7 +50,7 @@ public:
 	bool getWorldDataColor(Mat& output) ;
 	float dtmCpu(uint16* inMat, uint16* outMat, uchar minRange,uchar maxRange);
 	bool getDepth(Mat& output);
-	bool IsFrameReady();
+	bool IsDepthFrameReadyDrop();
 	bool getColorDist(Mat& output);
 
 	bool InitSocket();

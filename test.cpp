@@ -52,7 +52,7 @@ int main(int argc, char **argv) {
 //			rgbMat.rows*rgbMat.cols*rgbMat.elemSize(),640*480*sizeof(uchar)*3);
 	device.InitSocket();
 
-//	namedWindow("rgb", CV_WINDOW_AUTOSIZE);
+	namedWindow("rgb", CV_WINDOW_AUTOSIZE);
 	namedWindow("depth", CV_WINDOW_AUTOSIZE);
 	//namedWindow("regularDepth", CV_WINDOW_AUTOSIZE);
 
@@ -60,20 +60,50 @@ int main(int argc, char **argv) {
 	device.startDepth();
 	time(&startTime);
 	while (!die) {
+
+
 		{// stream depth
 			while(!device.getDepth(depthConvertedToShow)){;}
 //			cv::imshow("depth", depthConvertedToShow);
+//			/*
+//			 * A common mistake for opencv newcomers
+//			 * is to call cv::imshow() in a loop through video frames,
+//			 * without following up each draw with cv::waitKey(30).
+//			 * In this case, nothing appears on screen,
+//			 * because highgui is never given time
+//			 * to process the draw requests from cv::imshow()
+//			 */
+//			cvWaitKey(1);
 			while(!device.sendKinectFrameUDP(
 					static_cast<TUByte*>(depthConvertedToShow.data),
 					CHUNK_SIZE,
 					KINECT_FRAME_SIZE)){;}
 		}
-		/*
-		{// Get frames only test = 30 FPS :)
-			while (!device.IsFrameReady()){}
+
+
+//		{// Get frames only test = 30 FPS :)
+//			while (!device.IsDepthFrameReadyDrop()){}
+//		}
+
+		{//stream RGB
+			while(!device.getVideo(rgbMat)){;}
+//			cv::imshow("rgb", rgbMat);
+//			/*
+//			 * A common mistake for opencv newcomers
+//			 * is to call cv::imshow() in a loop through video frames,
+//			 * without following up each draw with cv::waitKey(30).
+//			 * In this case, nothing appears on screen,
+//			 * because highgui is never given time
+//			 * to process the draw requests from cv::imshow()
+//			 */
+//			cvWaitKey(1);
+			device.sendKinectFrameUDP(
+					static_cast<TUByte*>(rgbMat.data),
+					CHUNK_SIZE,
+					KINECT_FRAME_SIZE*3);
 		}
-		*/
-//		device.getVideo(rgbMat);
+
+
 //		device.getDepth(depthFromKinect);
 
 //		device.getColorDist(rgbMat);
@@ -81,7 +111,6 @@ int main(int argc, char **argv) {
 //		device.getDepthWithDist(depthConvertedToShow);
 //		device.getDepth(depthConvertedToShow);
 
-//		cv::imshow("rgb", rgbMat);
 
 //		depthFromKinect.convertTo(depthConvertedToShow, CV_8UC1, 255.0/2048.0);
 //		cv::imshow("depth", depthConvertedToShow);
@@ -97,10 +126,6 @@ int main(int argc, char **argv) {
 //				CHUNK_SIZE,
 //				KINECT_FRAME_SIZE);
 
-//		device.sendKinectFrameUDP(
-//				static_cast<TUByte*>(rgbMat.data),
-//				CHUNK_SIZE,
-//				KINECT_FRAME_SIZE*3);
 
 		++depthCounter;
 		if (abs(difftime(startTime, time(&currTime))) >= 1){ //if time passed one sec
@@ -117,7 +142,7 @@ int main(int argc, char **argv) {
 //		fclose(sentData);
 
 
-		char k = cvWaitKey(1);
+//		char k = cvWaitKey(1);
 //		if (k == 27) {
 //			cvDestroyWindow("rgb");
 //			cvDestroyWindow("depth");
