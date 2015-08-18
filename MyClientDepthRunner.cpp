@@ -11,7 +11,8 @@
 
 using namespace cv;
 
-MyClientDepthRunner::MyClientDepthRunner(){
+MyClientDepthRunner::MyClientDepthRunner(MyFreenectDevice& device):
+		MyClientRunner_I(device){
 	m_window_name="Depth";
 	SSocketConfig conf(	"10.0.0.2",
 						"10.0.0.1",

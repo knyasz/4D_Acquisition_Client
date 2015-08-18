@@ -12,7 +12,7 @@
 
 class MyClientDepthRunner: public virtual MyClientRunner_I {
 public:
-	MyClientDepthRunner();
+	MyClientDepthRunner(MyFreenectDevice& device);
 	virtual ~MyClientDepthRunner();
 	virtual void AllocateAndSendFrame();
 

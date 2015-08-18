@@ -14,7 +14,7 @@ using namespace NUdpSocket;
 
 class MyClientRGBRunner: public virtual MyClientRunner_I {
 public:
-	MyClientRGBRunner() ;
+	MyClientRGBRunner(MyFreenectDevice& device) ;
 	virtual ~MyClientRGBRunner() ;
 	virtual void AllocateAndSendFrame();
 };

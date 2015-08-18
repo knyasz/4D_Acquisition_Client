@@ -4,5 +4,6 @@
 /cuda
 *.o
 /test
+/Client
 *~
 GrayImg.jpg

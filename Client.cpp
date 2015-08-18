@@ -10,9 +10,10 @@
 #include "MyClientRGBRunner.h"
 
 int main(int argc, char **argv) {
-//	MyClientRunner_I::SetDevice();
-	MyClientRGBRunner RGB;
-	MyClientDepthRunner Depth;
+	Freenect::Freenect freenect;
+	MyFreenectDevice& device = freenect.createDevice<MyFreenectDevice>(0);
+	MyClientRGBRunner RGB(device);
+	MyClientDepthRunner Depth(device);
 	RGB.Run();
 	Depth.Run();
 

@@ -8,7 +8,9 @@
 #include "MyClientRunnerI.h"
 
 
-MyClientRunner_I::MyClientRunner_I():m_runner_is_initialized(false){;}
+MyClientRunner_I::MyClientRunner_I(MyFreenectDevice& device):
+	m_runner_is_initialized(false),
+	m_device(device){;}
 
 //void MyClientRunner_I::SetDevice(){
 //	if(m_device_is_set){

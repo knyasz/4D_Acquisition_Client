@@ -20,18 +20,17 @@ using namespace std;
 using namespace NUdpSocket;
 
 static const uint PIPE_LENGTH(10);
-static const Freenect::Freenect freenect;
+
 
 class MyClientRunner_I {
 public:
 //	static MyFreenectDevice& m_device;
 //	static void SetDevice();
 public:
-	MyFreenectDevice& m_device = freenect.createDevice<MyFreenectDevice>(0);
 //	static bool m_device_is_set;
 //	void static SetDevice();
 public:
-	MyClientRunner_I();
+	MyClientRunner_I(MyFreenectDevice& device);
 	virtual ~MyClientRunner_I(){;}
 	virtual void AllocateAndSendFrame() = 0;
 	virtual void showAndDeallocateFrame();
@@ -41,6 +40,7 @@ protected:
 	virtual bool popFromPipeSucessfully(Mat ** ppMat);
 protected:
 	string m_window_name;
+	MyFreenectDevice& m_device;
 
 	bool m_runner_is_initialized;
 	MyUDPStreamer m_udp_streamer;

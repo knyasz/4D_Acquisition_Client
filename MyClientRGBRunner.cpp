@@ -11,7 +11,8 @@
 
 using namespace cv;
 
-MyClientRGBRunner::MyClientRGBRunner(){
+MyClientRGBRunner::MyClientRGBRunner(MyFreenectDevice& device):
+		MyClientRunner_I(device){
 	m_window_name = "RGB";
 	SSocketConfig conf(	"10.0.0.2",
 						"10.0.0.1",
