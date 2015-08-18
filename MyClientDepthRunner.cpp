@@ -28,11 +28,11 @@ MyClientDepthRunner::MyClientDepthRunner(){
 				20);
 	}
 	namedWindow(m_window_name, CV_WINDOW_AUTOSIZE);
-//	m_device.startDepth();
+	m_device.startDepth();
 	m_runner_is_initialized = true;
 }
 MyClientDepthRunner::~MyClientDepthRunner(){
-//	m_device.stopDepth();
+	m_device.stopDepth();
 	destroyWindow(m_window_name);
 }
 void MyClientDepthRunner::AllocateAndSendFrame (){
