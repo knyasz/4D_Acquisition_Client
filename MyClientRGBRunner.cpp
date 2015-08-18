@@ -7,6 +7,8 @@
 
 #include "MyClientRGBRunner.h"
 
+
+
 using namespace cv;
 
 MyClientRGBRunner::MyClientRGBRunner(){
@@ -25,12 +27,19 @@ MyClientRGBRunner::MyClientRGBRunner(){
 				"MyClientRGBRunner",
 				20);
 	}
+	namedWindow(m_window_name, CV_WINDOW_AUTOSIZE);
+	m_device.startVideo();
 	m_runner_is_initialized = true;
 
 }
+
+MyClientRGBRunner::~MyClientRGBRunner(){
+	m_device.stopVideo();
+	destroyWindow(m_window_name);
+}
+
 void MyClientRGBRunner::AllocateAndSendFrame (){
 	Mat * pMat;
-	CUdpSocket *pSocket;
 	if(!m_runner_is_initialized){
 		throw Exception(
 				CV_StsBackTrace,
@@ -40,7 +49,7 @@ void MyClientRGBRunner::AllocateAndSendFrame (){
 				17);
 	}
 	pMat = new Mat(Size(640, 480), CV_8UC3,	Scalar(0));
-	while (!m_udp_streamer.getVideo(*pMat)){;}
+	while (!m_device.getVideo(*pMat)){;}
 
 	//NEVER push to pipe before sending !!!
 	while(	!m_udp_streamer.sendKinectFrameUDP(

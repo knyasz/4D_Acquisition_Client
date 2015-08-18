@@ -7,6 +7,8 @@
 
 #include "MyClientDepthRunner.h"
 
+#include <highgui.h>
+
 using namespace cv;
 
 MyClientDepthRunner::MyClientDepthRunner(){
@@ -25,9 +27,14 @@ MyClientDepthRunner::MyClientDepthRunner(){
 				"MyClientDepthRunner",
 				20);
 	}
+	namedWindow(m_window_name, CV_WINDOW_AUTOSIZE);
+//	m_device.startDepth();
 	m_runner_is_initialized = true;
 }
-
+MyClientDepthRunner::~MyClientDepthRunner(){
+//	m_device.stopDepth();
+	destroyWindow(m_window_name);
+}
 void MyClientDepthRunner::AllocateAndSendFrame (){
 	Mat * pMat;
 	CUdpSocket *pSocket;
@@ -40,7 +47,7 @@ void MyClientDepthRunner::AllocateAndSendFrame (){
 				34);
 	}
 	pMat = new Mat(Size(640, 480), CV_16UC1);
-	while (!m_udp_streamer.getDepth(*pMat)){;}
+	while (!m_device.getDepth(*pMat)){;}
 
 	//NEVER push to pipe before sending !!!
 	while(	!m_udp_streamer.sendKinectFrameUDP(

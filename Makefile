@@ -152,31 +152,30 @@ else
 	UDP_SOCKET := udpSocket64bit.a 
 endif
 
+OBJS=$(patsubst %.cpp,%.o,$(wildcard *.cpp))
+OBJS+=$(patsubst %.cu,%.o,$(wildcard *.cu))
+objs+=$(UDP_SOCKET)
+
 # Target rules
 all:build
 
-build:test
+build:Client
 
-test.o:test.cpp
-	$(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $< $(LIBRARIES)
+%.o:%.cpp
+#	@$(NVCC)  $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $< $(LIBRARIES)
+	@$(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $< $(LIBRARIES)
 	
-dtmGpu.o:dtmGpu.cu
-	$(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $< $(LIBRARIES)
-	
-MyFreenectDevice.o:MyFreenectDevice.cpp
-	$(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $< $(LIBRARIES)
-	
-MyMutex.o:MyMutex.cpp
-	$(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $< $(LIBRARIES)
+%.o:%.cu
+	@$(NVCC) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $< $(LIBRARIES)
+#	@$(NVCC)$(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $< $(LIBRARIES)
  
-test:dtmGpu.o test.o MyFreenectDevice.o MyMutex.o $(UDP_SOCKET)
-	$(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) \
-		 -o $@ $+ $(LIBRARIES) $(UDP_SOCKET)
+Client:$(OBJS)
+	@$(NVCC)$(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES) $(UDP_SOCKET)
 
 run:build
-	./test
+	./Client
 
 clean:
-	rm -f test *.o 
+	rm -f Client *.o 
 clobber:clean
 

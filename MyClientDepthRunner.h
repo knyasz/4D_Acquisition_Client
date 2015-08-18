@@ -13,8 +13,9 @@
 class MyClientDepthRunner: public virtual MyClientRunner_I {
 public:
 	MyClientDepthRunner();
-	virtual ~MyClientDepthRunner() {;}
+	virtual ~MyClientDepthRunner();
 	virtual void AllocateAndSendFrame();
+
 };
 
 #endif /* MYCLIENTDEPTHRUNNER_H_ */

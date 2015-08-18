@@ -26,16 +26,12 @@ MyFreenectDevice::MyFreenectDevice(freenect_context *_ctx, int _index) :
 		m_new_rgb_frame(false),
 		m_new_depth_frame(false),
 		depthMat(Size(640, 480), CV_16UC1),
-		depth_window_name("depth"),
 		rgbMat(Size(640, 480), CV_8UC3,	Scalar(0)),
-		rgb_window_name("rgb"),
 
 		ownMat(Size(640, 480), CV_8UC3, Scalar(0)){
 
-	namedWindow(depth_window_name, CV_WINDOW_AUTOSIZE);
-	startVideo();
-	namedWindow(rgb_window_name, CV_WINDOW_AUTOSIZE);
-	startDepth();
+//	startVideo();
+//	startDepth();
 
 	for (unsigned int i = 0; i < 2048; i++) {
 		float v = i / 2048.0;

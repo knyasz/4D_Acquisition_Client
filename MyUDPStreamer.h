@@ -1,22 +1,16 @@
-/*
- * MyFreenectUDPStreamer.h
- *
- *  Created on: Aug 10, 2015
- *      Author: alexandalex
- */
 
-#ifndef MYFREENECTUDPSTREAMER_H_
-#define MYFREENECTUDPSTREAMER_H_
+#ifndef MYUDPSTREAMER_H_
+#define MYUDPSTREAMER_H_
 
 #include "MyFreenectDevice.h"
 #include "udpSocket.h"
 
 using namespace NUdpSocket;
 
-class MyFreenectUDPStreamer: public virtual  MyFreenectDevice {
+class MyUDPStreamer {
 public:
-	MyFreenectUDPStreamer(){;}
-	virtual ~MyFreenectUDPStreamer(){
+	MyUDPStreamer(){;}
+	virtual ~MyUDPStreamer(){
 		m_socket.closeSocket();
 	}
 	virtual bool InitSocket( SSocketConfig& conf){
@@ -39,4 +33,4 @@ private:
 	CUdpSocket m_socket;
 };
 
-#endif /* MYFREENECTUDPSTREAMER_H_ */
+#endif /* MYUDPSTREAMER_H_ */

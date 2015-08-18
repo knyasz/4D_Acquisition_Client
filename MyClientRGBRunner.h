@@ -15,7 +15,7 @@ using namespace NUdpSocket;
 class MyClientRGBRunner: public virtual MyClientRunner_I {
 public:
 	MyClientRGBRunner() ;
-	virtual ~MyClientRGBRunner() {;}
+	virtual ~MyClientRGBRunner() ;
 	virtual void AllocateAndSendFrame();
 };
 

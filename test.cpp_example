@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
 	time_t startTime(0.), currTime(0.);
 	//FILE* sentData;
 	//TUByte* buffer = new TUByte[KINECT_FRAME_SIZE];
-
+	"rgb"
 	Mat depthFromKinect(Size(640, 480), CV_16UC1);
 	Mat depthConvertedToShow(Size(640, 480), CV_8UC1);
 	Mat rgbMat(Size(640, 480), CV_8UC3, Scalar(0));
@@ -143,10 +143,10 @@ int main(int argc, char **argv) {
 //		fwrite(depthf.data,sizeof(char),KINECT_FRAME_SIZE,sentData);
 //		fclose(sentData);
 
-
+		"rgb"
 //		char k = cvWaitKey(1);
 //		if (k == 27) {
-//			cvDestroyWindow("rgb");
+			cvDestroyWindow("rgb");
 //			cvDestroyWindow("depth");
 //			break;
 //		}

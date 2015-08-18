@@ -5,9 +5,9 @@
  *      Author: alexandalex
  */
 
-#include "MyFreenectUDPStreamer.h"
+#include "MyUDPStreamer.h"
 
-bool MyFreenectUDPStreamer::sendKinectFrameUDP(	TUByte* buffer,
+bool MyUDPStreamer::sendKinectFrameUDP(	TUByte* buffer,
 											TUDWord chunkSize,
 											const TUDWord totSize) {
 	bool rv(false), status(true);
@@ -26,7 +26,7 @@ bool MyFreenectUDPStreamer::sendKinectFrameUDP(	TUByte* buffer,
 			//printf("Sent pack (%d) a chunck of (%d) bytes \n theres (%d) data left \n",packet,currChunk,bytesLeft);
 			//getchar();
 		} else {
-			printf("Couldnt Send the data\n");
+			printf("Couldn't Send the data\n");
 			status = false;
 		}
 

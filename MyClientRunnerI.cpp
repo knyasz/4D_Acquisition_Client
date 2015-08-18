@@ -8,9 +8,15 @@
 #include "MyClientRunnerI.h"
 
 
+MyClientRunner_I::MyClientRunner_I():m_runner_is_initialized(false){;}
 
-
-
+//void MyClientRunner_I::SetDevice(){
+//	if(m_device_is_set){
+//		return;
+//	}
+//	Freenect::Freenect freenect;
+//	m_device ( freenect.createDevice<MyFreenectDevice>(0) );
+//}
 
 
 void MyClientRunner_I::showAndDeallocateFrame(){
@@ -53,5 +59,12 @@ bool MyClientRunner_I::popFromPipeSucessfully(Mat ** ppMat){
 		}
 	m_pipe_mutex.unlock();
 	return true;
+}
+void MyClientRunner_I::Run(){
+	//TODO insert threads
+	while(true){
+		AllocateAndSendFrame();
+		showAndDeallocateFrame();
+	}
 }
 
