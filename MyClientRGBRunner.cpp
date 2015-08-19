@@ -38,7 +38,10 @@ MyClientRGBRunner::~MyClientRGBRunner(){
 	m_device.stopVideo();
 	destroyWindow(m_window_name);
 }
-
+void MyClientRGBRunner::showAndDeallocateFrame(){
+	MyClientRunner_I::showAndDeallocateFrame();
+	PrintoutEventsCounted("RGB frame shown");
+}
 void MyClientRGBRunner::AllocateAndSendFrame (){
 	Mat * pMat;
 	if(!m_runner_is_initialized){
@@ -58,5 +61,6 @@ void MyClientRGBRunner::AllocateAndSendFrame (){
 								CHUNK_SIZE,
 								KINECT_FRAME_SIZE)				){;}
 	pushToPipe(pMat);
+	PrintoutEventsCounted("RGB frame sent");
 
 }

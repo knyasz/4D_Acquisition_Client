@@ -7,18 +7,32 @@
 
 #include "MyClientRunnerI.h"
 
+uint MyClientRunner_I::s_event_counter = 0;
+time_t MyClientRunner_I::startTime = 0.;
+time_t MyClientRunner_I::currTime = 0.;
+void MyClientRunner_I::PrintoutEventsCounted(string eventName){
+	++s_event_counter;
+	if (abs(difftime(startTime, time(&currTime))) >= 1){ //if time passed one sec
+		cout<<"Performed (" << s_event_counter << ") "<< eventName
+				<< " events at this second \n" << endl;
+		s_event_counter = 0;
+		startTime = time(NULL);
+	}
+}
+
+void* MyClientRunner_I::AllocateAndSendFrameThread(void * This){
+	((MyClientRunner_I *)This)->AllocateAndSendFrameLoop();
+	return NULL;
+}
+void* MyClientRunner_I::showAndDeallocateFrameThread(void * This){
+	((MyClientRunner_I *)This)->showAndDeallocateFrameLoop();
+	return NULL;
+}
 
 MyClientRunner_I::MyClientRunner_I(MyFreenectDevice& device):
 	m_runner_is_initialized(false),
 	m_device(device){;}
 
-//void MyClientRunner_I::SetDevice(){
-//	if(m_device_is_set){
-//		return;
-//	}
-//	Freenect::Freenect freenect;
-//	m_device ( freenect.createDevice<MyFreenectDevice>(0) );
-//}
 
 
 void MyClientRunner_I::showAndDeallocateFrame(){
@@ -62,11 +76,21 @@ bool MyClientRunner_I::popFromPipeSucessfully(Mat ** ppMat){
 	m_pipe_mutex.unlock();
 	return true;
 }
-void MyClientRunner_I::Run(){
-	//TODO insert threads
-	while(true){
-		AllocateAndSendFrame();
-		showAndDeallocateFrame();
-	}
+
+bool MyClientRunner_I::AllocateAndSendFrameRun(){
+	return (	pthread_create(
+				&t_allocate_and_send,
+				NULL,
+				AllocateAndSendFrameThread,
+				this)
+											) == 0;
+}
+bool MyClientRunner_I::showAndDeallocateFrameRun(){
+	return (	pthread_create(
+				&t_show_and_deallocate,
+				NULL,
+				showAndDeallocateFrameThread,
+				this)
+											) == 0;
 }
 

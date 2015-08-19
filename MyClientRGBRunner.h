@@ -17,6 +17,7 @@ public:
 	MyClientRGBRunner(MyFreenectDevice& device) ;
 	virtual ~MyClientRGBRunner() ;
 	virtual void AllocateAndSendFrame();
+	virtual void showAndDeallocateFrame();
 };
 
 #endif /* MYCLIENTRGBRUNNER_H_ */

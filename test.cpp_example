@@ -129,13 +129,13 @@ int main(int argc, char **argv) {
 //				KINECT_FRAME_SIZE);
 
 
-//		++depthCounter;
-//		if (abs(difftime(startTime, time(&currTime))) >= 1){ //if time passed one sec
-//			printf("I successfully sent (%d) frame at this second \n",
-//					depthCounter);
-//			depthCounter = 0;
-//			startTime = time(NULL);
-//		}
+		++depthCounter;
+		if (abs(difftime(startTime, time(&currTime))) >= 1){ //if time passed one sec
+			printf("I successfully sent (%d) frame at this second \n",
+					depthCounter);
+			depthCounter = 0;
+			startTime = time(NULL);
+		}
 
 
 //		getchar();

@@ -14,8 +14,12 @@ int main(int argc, char **argv) {
 	MyFreenectDevice& device = freenect.createDevice<MyFreenectDevice>(0);
 	MyClientRGBRunner RGB(device);
 	MyClientDepthRunner Depth(device);
-	RGB.Run();
-	Depth.Run();
+	while(true){
+		RGB.AllocateAndSendFrameRun();
+		Depth.AllocateAndSendFrameRun();
+		RGB.showAndDeallocateFrameRun();
+		Depth.showAndDeallocateFrameRun();
+	}
 
 
 	return 0;

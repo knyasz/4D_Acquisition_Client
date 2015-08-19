@@ -56,5 +56,10 @@ void MyClientDepthRunner::AllocateAndSendFrame (){
 								CHUNK_SIZE,
 								KINECT_FRAME_SIZE)				){;}
 	pushToPipe(pMat);
+	PrintoutEventsCounted("Depth frame sent");
+}
 
+void MyClientDepthRunner::showAndDeallocateFrame(){
+	MyClientRunner_I::showAndDeallocateFrame();
+	PrintoutEventsCounted("Depth frame shown");
 }
