@@ -30,6 +30,8 @@ MyClientRGBRunner::MyClientRGBRunner(MyFreenectDevice& device):
 	}
 	namedWindow(m_window_name, CV_WINDOW_AUTOSIZE);
 	m_device.startVideo();
+	mAllocateCounter.Init("RGB send");
+	mShowCounter.Init("RGB show");
 	m_runner_is_initialized = true;
 
 }
@@ -40,7 +42,7 @@ MyClientRGBRunner::~MyClientRGBRunner(){
 }
 void MyClientRGBRunner::showAndDeallocateFrame(){
 	MyClientRunner_I::showAndDeallocateFrame();
-	PrintoutEventsCounted("RGB frame shown");
+	mShowCounter.PrintoutEventsCounted();
 }
 void MyClientRGBRunner::AllocateAndSendFrame (){
 	Mat * pMat;
@@ -61,6 +63,6 @@ void MyClientRGBRunner::AllocateAndSendFrame (){
 								CHUNK_SIZE,
 								KINECT_FRAME_SIZE)				){;}
 	pushToPipe(pMat);
-	PrintoutEventsCounted("RGB frame sent");
+	mAllocateCounter.PrintoutEventsCounted();
 
 }

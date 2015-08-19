@@ -30,6 +30,8 @@ MyClientDepthRunner::MyClientDepthRunner(MyFreenectDevice& device):
 	}
 	namedWindow(m_window_name, CV_WINDOW_AUTOSIZE);
 	m_device.startDepth();
+	mAllocateCounter.Init("Depth send");
+	mShowCounter.Init("Depth show");
 	m_runner_is_initialized = true;
 }
 MyClientDepthRunner::~MyClientDepthRunner(){
@@ -56,10 +58,10 @@ void MyClientDepthRunner::AllocateAndSendFrame (){
 								CHUNK_SIZE,
 								KINECT_FRAME_SIZE)				){;}
 	pushToPipe(pMat);
-	PrintoutEventsCounted("Depth frame sent");
+	mAllocateCounter.PrintoutEventsCounted();
 }
 
 void MyClientDepthRunner::showAndDeallocateFrame(){
 	MyClientRunner_I::showAndDeallocateFrame();
-	PrintoutEventsCounted("Depth frame shown");
+	mShowCounter.PrintoutEventsCounted();
 }

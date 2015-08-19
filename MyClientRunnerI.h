@@ -13,7 +13,8 @@
 #include <libfreenect.hpp>
 #include "MyMutex.h"
 #include <queue>
-#include "time.h"
+
+#include "MyEventsCounter.h"
 
 #include "pthread.h"
 
@@ -27,10 +28,7 @@ static const uint PIPE_LENGTH(10);
 
 class MyClientRunner_I {
 public:
-	static uint s_event_counter;
-	static time_t startTime;
-	static time_t currTime;
-	static void PrintoutEventsCounted(string eventName);
+
 
 	static void* AllocateAndSendFrameThread(void * This);
 	static void* showAndDeallocateFrameThread(void * This);
@@ -71,7 +69,8 @@ protected:
 	pthread_t t_allocate_and_send;
 	pthread_t t_show_and_deallocate;
 
-
+	MyEventsCounter mAllocateCounter;
+	MyEventsCounter mShowCounter;
 
 };
 

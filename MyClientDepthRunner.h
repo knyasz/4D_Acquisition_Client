@@ -14,9 +14,9 @@ class MyClientDepthRunner: public virtual MyClientRunner_I {
 public:
 	MyClientDepthRunner(MyFreenectDevice& device);
 	virtual ~MyClientDepthRunner();
-protected:
 	virtual void AllocateAndSendFrame();
 	virtual void showAndDeallocateFrame();
+protected:
 
 };
 
