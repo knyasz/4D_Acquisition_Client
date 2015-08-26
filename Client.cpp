@@ -16,25 +16,33 @@ int main(int argc, char **argv) {
 	MyClientDepthRunner Depth(device);
 
 
-//	cout<<"Depth.AllocateAndSendFrameRun=========== "
-//			<<Depth.AllocateAndSendFrameRun();
-//	cout<<"Depth.showAndDeallocateFrameRun=========== "
-//			<<Depth.showAndDeallocateFrameRun();
-//
-//
-//	cout<<"RGB.AllocateAndSendFrameRun=========== "
-//			<<RGB.AllocateAndSendFrameRun()<<endl;
-//	cout<<"RGB.showAndDeallocateFrameRun=========== "
-//			<<RGB.showAndDeallocateFrameRun()<<endl;
-
-	while(true){
-		RGB.AllocateAndSendFrame();
-//		RGB.AllocateAndSendFrame();
-//		RGB.showAndDeallocateFrame();
-		Depth.AllocateAndSendFrame();
-//		Depth.AllocateAndSendFrame();
-//		Depth.showAndDeallocateFrame();
+//	if(!Depth.AllocateAndSendFrameRun()){
+//		return 1;
+//	}
+//	if(!Depth.showAndDeallocateFrameRun()){
+//		return 1;
+//	}
+	if(!RGB.AllocateAndSendFrameRun()){
+		return 1;
 	}
+	if(!RGB.showAndDeallocateFrameRun()){
+		return 1;
+	}
+
+
+//	while(true){
+//		Depth.AllocateAndSendFrame();
+//		RGB.AllocateAndSendFrame();
+//	}
+
+
+
+
+
+//	Depth.JoinAllocateAndSend();
+//	Depth.JoinShowAndeallocate();
+	RGB.JoinAllocateAndSend();
+	RGB.JoinShowAndeallocate();
 
 	return 0;
 }

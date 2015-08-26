@@ -43,19 +43,23 @@ MyFreenectDevice::MyFreenectDevice(freenect_context *_ctx, int _index) :
 void MyFreenectDevice::VideoCallback(void* _rgb, uint32_t timestamp) {
 	//std::cout << "RGB callback" << std::endl;
 	m_rgb_mutex.lock();
-	uint8_t* rgb = static_cast<uint8_t*>(_rgb);
-	rgbMat.data = rgb;
-	m_new_rgb_frame = true;
+	if(_rgb){
+		uint8_t* rgb = static_cast<uint8_t*>(_rgb);
+		rgbMat.data = rgb;
+		m_new_rgb_frame = true;
+	}
 	m_rgb_mutex.unlock();
 }
 void MyFreenectDevice::DepthCallback(void* _depth, uint32_t timestamp) {
 	//std::cout << "Depth callback" << std::endl;
-	static time_t startTime(time(NULL));
+//	static time_t startTime(time(NULL));
 	m_depth_mutex.lock();
-	uint16_t* depth = static_cast<uint16_t*>(_depth);
-	depthMat.data = (uchar*) depth;
+	if(_depth){
+		uint16_t* depth = static_cast<uint16_t*>(_depth);
+		depthMat.data = (uchar*) depth;
 
-	m_new_depth_frame = true;
+		m_new_depth_frame = true;
+	}
 //	++countGlobal;
 //	if (abs(difftime(startTime, time(NULL))) >= 1) //if time passed one sec
 //			{
@@ -68,15 +72,15 @@ void MyFreenectDevice::DepthCallback(void* _depth, uint32_t timestamp) {
 }
 
 bool MyFreenectDevice::getVideo(Mat& output) {
+	bool result = false;
 	m_rgb_mutex.lock();
 	if (m_new_rgb_frame) {
 		cv::cvtColor(rgbMat, output, CV_RGB2BGR);
 		m_new_rgb_frame = false;
-		m_rgb_mutex.unlock();
-		return true;
+		result =  true;;
 	}
 	m_rgb_mutex.unlock();
-	return false;
+	return result;
 }
 
 bool MyFreenectDevice::getDepth(Mat& output) {
@@ -92,14 +96,14 @@ bool MyFreenectDevice::getDepth(Mat& output) {
 	return result;
 }
 bool MyFreenectDevice::IsDepthFrameReadyDrop(){
+	bool result = false;
 	m_depth_mutex.lock();
 	if(m_new_depth_frame) {
 		m_new_depth_frame = false;
-		m_depth_mutex.unlock();
-		return true;
+		result = true;
 	}
 	m_depth_mutex.unlock();
-	return false;
+	return result;
 }
 
 bool MyFreenectDevice::getDepthWithDist(Mat& output) {

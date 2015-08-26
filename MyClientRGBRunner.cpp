@@ -40,10 +40,6 @@ MyClientRGBRunner::~MyClientRGBRunner(){
 	m_device.stopVideo();
 	destroyWindow(m_window_name);
 }
-void MyClientRGBRunner::showAndDeallocateFrame(){
-	MyClientRunner_I::showAndDeallocateFrame();
-	mShowCounter.PrintoutEventsCounted();
-}
 void MyClientRGBRunner::AllocateAndSendFrame (){
 	Mat * pMat;
 	if(!m_runner_is_initialized){
@@ -55,7 +51,16 @@ void MyClientRGBRunner::AllocateAndSendFrame (){
 				17);
 	}
 	pMat = new Mat(Size(640, 480), CV_8UC3,	Scalar(0));
-	while (!m_device.getVideo(*pMat)){;}
+	uint retries=0;
+	while (!m_device.getVideo(*pMat)){
+//		cout<<endl<<"can't get RGB "<<retries++<<endl;
+		if(retries>RETRIES_LIMIT){
+			usleep(33);
+			delete pMat;
+			return;
+		}
+		pthread_yield();;
+	}
 
 	//NEVER push to pipe before sending !!!
 	while(	!m_udp_streamer.sendKinectFrameUDP(

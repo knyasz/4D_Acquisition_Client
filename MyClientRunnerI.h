@@ -23,7 +23,8 @@ using namespace std;
 
 using namespace NUdpSocket;
 
-static const uint PIPE_LENGTH(10);
+static const uint PIPE_LENGTH(20);
+static const uint RETRIES_LIMIT(10);
 
 
 class MyClientRunner_I {
@@ -36,15 +37,21 @@ public:
 public:
 	MyClientRunner_I(MyFreenectDevice& device);
 	virtual ~MyClientRunner_I(){
-		pthread_join(t_allocate_and_send,NULL);
-		pthread_join(t_show_and_deallocate,NULL);
+//		pthread_join(t_allocate_and_send,NULL);
+//		pthread_join(t_show_and_deallocate,NULL);
 
+	}
+	virtual void JoinAllocateAndSend(){
+		pthread_join(t_allocate_and_send,NULL);
+	}
+	virtual void JoinShowAndeallocate(){
+		pthread_join(t_show_and_deallocate,NULL);
 	}
 	virtual bool AllocateAndSendFrameRun();
 	virtual bool showAndDeallocateFrameRun();
-protected:
 	virtual void AllocateAndSendFrame() = 0;
-	virtual void showAndDeallocateFrame();
+protected:
+	virtual bool showAndDeallocateFrameSucessfully();
 	virtual void pushToPipe(Mat * pMat);
 	virtual bool popFromPipeSucessfully(Mat ** ppMat);
 	virtual void AllocateAndSendFrameLoop(){
@@ -54,7 +61,7 @@ protected:
 	}
 	virtual void showAndDeallocateFrameLoop(){
 		while(true){
-			showAndDeallocateFrame();
+			showAndDeallocateFrameSucessfully();
 		}
 	}
 protected:

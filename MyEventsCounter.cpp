@@ -24,7 +24,7 @@ void MyEventsCounter::Init(string eventName){
 void MyEventsCounter::PrintoutEventsCounted(){
 	++m_event_counter;
 	if (abs(difftime(m_startTime, time(&m_currTime))) >= 1){ //if time passed one sec
-		cout<<"Performed (" << m_event_counter << ") "<< m_eventName
+		cout<<endl<<"Performed (" << m_event_counter << ") "<< m_eventName
 				<< " events at this second \n" << endl;
 		m_event_counter = 0;
 		m_startTime = time(NULL);

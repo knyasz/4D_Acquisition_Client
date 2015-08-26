@@ -50,7 +50,16 @@ void MyClientDepthRunner::AllocateAndSendFrame (){
 				34);
 	}
 	pMat = new Mat(Size(640, 480), CV_16UC1);
-	while (!m_device.getDepth(*pMat)){;}
+	uint retries=0;
+	while (!m_device.getDepth(*pMat)){
+//		cout<<endl<<"can't get Depth "<<retries++<<endl;
+		if(retries>RETRIES_LIMIT){
+			usleep(33);
+			delete pMat;
+			return;
+		}
+		pthread_yield();;
+	}
 
 	//NEVER push to pipe before sending !!!
 	while(	!m_udp_streamer.sendKinectFrameUDP(
@@ -61,7 +70,4 @@ void MyClientDepthRunner::AllocateAndSendFrame (){
 	mAllocateCounter.PrintoutEventsCounted();
 }
 
-void MyClientDepthRunner::showAndDeallocateFrame(){
-	MyClientRunner_I::showAndDeallocateFrame();
-	mShowCounter.PrintoutEventsCounted();
-}
+

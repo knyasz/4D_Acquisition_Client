@@ -101,6 +101,7 @@ LDFLAGS += -rpath-link=$(TARGET_FS)/usr/lib/arm-linux-$(abi)
 endif
 
 # Debug build flags
+dbg = 1
 ifeq ($(dbg),1)
       NVCCFLAGS += -g -G
       TARGET := debug
