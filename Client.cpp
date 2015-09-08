@@ -16,18 +16,18 @@ int main(int argc, char **argv) {
 	MyClientDepthRunner Depth(device);
 
 
-//	if(!Depth.AllocateAndSendFrameRun()){
-//		return 1;
-//	}
-//	if(!Depth.showAndDeallocateFrameRun()){
-//		return 1;
-//	}
-	if(!RGB.AllocateAndSendFrameRun()){
+	if(!Depth.AllocateAndSendFrameRun()){
 		return 1;
 	}
-	if(!RGB.showAndDeallocateFrameRun()){
+	if(!Depth.showAndDeallocateFrameRun()){
 		return 1;
 	}
+//	if(!RGB.AllocateAndSendFrameRun()){
+//		return 1;
+//	}
+//	if(!RGB.showAndDeallocateFrameRun()){
+//		return 1;
+//	}
 
 
 //	while(true){
@@ -39,10 +39,10 @@ int main(int argc, char **argv) {
 
 
 
-//	Depth.JoinAllocateAndSend();
-//	Depth.JoinShowAndeallocate();
-	RGB.JoinAllocateAndSend();
-	RGB.JoinShowAndeallocate();
+	Depth.JoinAllocateAndSend();
+	Depth.JoinShowAndeallocate();
+//	RGB.JoinAllocateAndSend();
+//	RGB.JoinShowAndeallocate();
 
 	return 0;
 }
