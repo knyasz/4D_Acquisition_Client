@@ -19,7 +19,8 @@ bool MyUDPStreamer::sendKinectFrameUDP(	TUByte* buffer,
         //send header before you send anything else
         NUdpMessages::SHeader header;
         header.opCode = NUdpMessages::EOpCodesSend::OP_FRAME_DEP_SND;
-        header.size = totSize;
+        header.size = KINECT_FRAME_SIZE;
+        header.checksum = 0xabcdef00;
         sendData(reinterpret_cast<TUByte*>(&header), sizeof(NUdpMessages::SHeader));
 
 	while ((status) && (bytesLeft > 0)) {
