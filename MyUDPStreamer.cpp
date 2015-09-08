@@ -6,6 +6,7 @@
  */
 
 #include "MyUDPStreamer.h"
+#include "Messages.h"
 
 bool MyUDPStreamer::sendKinectFrameUDP(	TUByte* buffer,
 											TUDWord chunkSize,
@@ -14,6 +15,12 @@ bool MyUDPStreamer::sendKinectFrameUDP(	TUByte* buffer,
 	TSDWord bytesLeft(totSize);
 	TUDWord buffIndex(0);
 	TUDWord packet(0);
+        
+        //send header before you send anything else
+        NUdpMessages::SHeader header;
+        header.opCode = NUdpMessages::EOpCodesSend::OP_FRAME_DEP_SND;
+        header.size = totSize;
+        sendData(reinterpret_cast<TUByte*>(&header), sizeof(NUdpMessages::SHeader));
 
 	while ((status) && (bytesLeft > 0)) {
 		TUDWord currChunk=
