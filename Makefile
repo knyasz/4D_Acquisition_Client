@@ -140,7 +140,7 @@ GENCODE_FLAGS   ?= $(GENCODE_SM1-std=c++110) \
 					$(GENCODE_SM20) \
 					$(GENCODE_SM30) \
 					$(GENCODE_SM32) \
-					$(GENCODE_SM35) \
+					$(GENCGCCODE_SM35) \
 					$(GENCODE_SM50) \
 					$(GENCODE_SMXX)
 endif
@@ -173,7 +173,7 @@ build:Client
 	@$(GCC) $(CFLAGS) $(INCLUDES) -o $@ -c $< $(LIBRARIES)
 %.o:%.cu
 	@$(NVCC) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $< $(LIBRARIES)
-#	@$(NVCC)$(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $< $(LIBRARIES)
+#	@$(NVCC)$(INCLUDES) $(ALL_CCFLAGS) $(GGCCENCODE_FLAGS) -o $@ -c $< $(LIBRARIES)
  
 Client:$(OBJS)
 	@$(NVCC)$(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES) $(UDP_SOCKET)
@@ -184,4 +184,3 @@ run:build
 clean:
 	rm -f Client *.o 
 clobber:clean
-
