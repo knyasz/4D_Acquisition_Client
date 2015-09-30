@@ -71,7 +71,7 @@ LDFLAGS     :=
 # Extra user flags
 EXTRA_NVCCFLAGS   ?= 
 EXTRA_LDFLAGS     ?=	
-EXTRA_CCFLAGS     ?=	
+EXTRA_CCFLAGS     ?= 
 
 # OS-specific build flags
 ifneq ($(DARWIN),)
@@ -109,7 +109,7 @@ else
       TARGET := release
 endif
 
-ALL_CCFLAGS :=
+ALL_CCFLAGS := 
 ALL_CCFLAGS += $(NVCCFLAGS)
 ALL_CCFLAGS += $(EXTRA_NVCCFLAGS)
 ALL_CCFLAGS += $(addprefix -Xcompiler ,$(CCFLAGS))
@@ -136,7 +136,7 @@ GENCODE_SMXX    := -gencode arch=compute_50,code=compute_50
 ifeq ($(OS_ARCH),armv7l)
 GENCODE_FLAGS   ?= $(GENCODE_SM32)
 else
-GENCODE_FLAGS   ?= $(GENCODE_SM10) \
+GENCODE_FLAGS   ?= $(GENCODE_SM1-std=c++110) \
 					$(GENCODE_SM20) \
 					$(GENCODE_SM30) \
 					$(GENCODE_SM32) \
@@ -157,15 +157,20 @@ OBJS=$(patsubst %.cpp,%.o,$(wildcard *.cpp))
 OBJS+=$(patsubst %.cu,%.o,$(wildcard *.cu))
 objs+=$(UDP_SOCKET)
 
+CFLAGS= -std=c++11 -fPIC -g -Wall
+ 
+
 # Target rules
 all:build
 
 build:Client
 
+
+
 %.o:%.cpp
 #	@$(NVCC)  $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $< $(LIBRARIES)
-	@$(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $< $(LIBRARIES)
-	
+#	@$(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $< $(LIBRARIES)
+	@$(GCC) $(CFLAGS) $(INCLUDES) -o $@ -c $< $(LIBRARIES)
 %.o:%.cu
 	@$(NVCC) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $< $(LIBRARIES)
 #	@$(NVCC)$(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $< $(LIBRARIES)
@@ -179,4 +184,3 @@ run:build
 clean:
 	rm -f Client *.o 
 clobber:clean
-
