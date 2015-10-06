@@ -58,7 +58,8 @@ ifeq ($(OS_ARCH),armv7l)
 else
 	LD_CUDALIBS_LOCATION := -L/usr/local/cuda/lib64
 endif
-LD_CUDALIBS := -lcudart -lnpps -lnppi -lnppc -lcufft
+#LD_CUDALIBS := -lcudart -lnpps -lnppi -lnppc -lcufft
+LD_CUDALIBS := -lnpps -lnppi -lnppc -lcufft
 LIBRARIES += $(LD_CUDALIBS_LOCATION) $(LD_CUDALIBS) 
 
 
