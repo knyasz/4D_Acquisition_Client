@@ -5,6 +5,7 @@
 *.o
 /test
 /Client
+/Acquisition
 *~
 GrayImg.jpg
 
