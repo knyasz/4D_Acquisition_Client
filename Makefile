@@ -44,7 +44,7 @@ endif
 INCLUDES  := -I/usr/local/include/libfreenect 
 LD_LIBS_LOCATION := -L/usr/local/lib
 LD_LIBS :=  -lfreenect  -lopencv_core -lopencv_highgui -lopencv_imgproc -lpthread
-LIBRARIES := $(LD_LIBS_LOCATION) $(LD_LIBS) \
+LIBRARIES := $(LD_LIBS_LOCATION) $(LD_LIBS) 
 
 
 # Location of the CUDA Toolkit
@@ -58,8 +58,8 @@ ifeq ($(OS_ARCH),armv7l)
 else
 	LD_CUDALIBS_LOCATION := -L/usr/local/cuda/lib64
 endif
-#LD_CUDALIBS := -lcudart -lnpps -lnppi -lnppc -lcufft
-LD_CUDALIBS := -lnpps -lnppi -lnppc -lcufft
+LD_CUDALIBS := -lcudart -lnpps -lnppi -lnppc -lcufft
+#LD_CUDALIBS := -lnpps -lnppi -lnppc -lcufft
 LIBRARIES += $(LD_CUDALIBS_LOCATION) $(LD_CUDALIBS) 
 
 
@@ -121,6 +121,14 @@ ALL_LDFLAGS += $(ALL_CCFLAGS)
 ALL_LDFLAGS += $(addprefix -Xlinker ,$(LDFLAGS))
 ALL_LDFLAGS += $(addprefix -Xlinker ,$(EXTRA_LDFLAGS))
 
+MPI_CCFLAGS :=
+MPI_CCFLAGS += $(CCFLAGS)
+MPI_CCFLAGS += $(EXTRA_CCFLAGS)
+
+MPI_LDFLAGS :=
+MPI_LDFLAGS += $(addprefix -Xlinker ,$(LDFLAGS))
+MPI_LDFLAGS += $(addprefix -Xlinker ,$(EXTRA_LDFLAGS))
+
 
 ################################################################################
 
@@ -147,6 +155,30 @@ GENCODE_FLAGS   ?= $(GENCODE_SM1-std=c++110) \
 endif
 
 ################################################################################
+EXEC   ?=
+
+# MPI check and binaries
+MPICXX ?= $(shell which mpicxx 2>/dev/null)
+
+ifneq ($(shell uname -m | sed -e "s/i386/i686/"), ${OS_ARCH})
+      $(info -----------------------------------------------------------------------------------------------)
+      $(info WARNING - attempting to detect 32-bit MPI compiler.)
+      MPICXX := $(shell echo $(MPICXX) | sed -e "s/64//")
+endif
+
+ifeq ($(MPICXX),)
+      MPICXX=mpicxx
+      EXEC=@echo "[@]"
+else
+      MPI_GCC := $(shell $(MPICXX) -v 2>&1 | grep gcc | wc -l | tr -d ' ')
+ifeq ($(MPI_GCC),0)
+      MPI_CCFLAGS += -stdlib=libstdc++
+      MPI_LDFLAGS += -stdlib=libstdc++
+endif
+endif
+################################################################################
+
+
 
 ifeq ($(OS_ARCH),armv7l)
 	UDP_SOCKET := udpSocket.a 
@@ -156,7 +188,7 @@ endif
 
 OBJS=$(patsubst %.cpp,%.o,$(wildcard *.cpp))
 OBJS+=$(patsubst %.cu,%.o,$(wildcard *.cu))
-objs+=$(UDP_SOCKET)
+#OBJS+=$(UDP_SOCKET)
 
 CFLAGS= -std=c++11 -fPIC -g -Wall
  
@@ -170,22 +202,24 @@ build:Acquisition
 
 
 %.o:%.cpp
-#	@$(NVCC)  $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $< $(LIBRARIES)
-#	@$(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $< $(LIBRARIES)
-	@$(GCC) $(CFLAGS) $(INCLUDES) -o $@ -c $< $(LIBRARIES)
+#	@$(GCC) $(CFLAGS) $(INCLUDES) -o $@ -c $< $(LIBRARIES)
+	$(EXEC) $(MPICXX) $(INCLUDES) $(MPI_CCFLAGS) -o $@ -c $< $(LIBRARIES)
 %.o:%.cu
-	@$(NVCC) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $< $(LIBRARIES)
-#	@$(NVCC)$(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $< $(LIBRARIES)
+#	@$(NVCC) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $< $(LIBRARIES)
+	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $< $(LIBRARIES)
  
 #Client:$(OBJS)
 Acquisition:$(OBJS)
-	@$(NVCC)$(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES) $(UDP_SOCKET)
+#	@$(NVCC)$(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES) $(UDP_SOCKET)
+	$(EXEC) $(MPICXX) $(MPI_LDFLAGS) -o $@ $+ $(LIBRARIES) $(UDP_SOCKET)
 
 run:build
 #	./Client
-	./Acquisition
+	$(EXEC)./Acquisition
 
 clean:
 #	rm -f Client *.o 
 	rm -f Acquisition *.o 
 clobber:clean
+
+print-%  : ; @echo $* = $($*)
