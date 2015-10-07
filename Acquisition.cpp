@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
 //	Mat rgbMat(Size(640, 480), CV_8UC3, Scalar(0));
 
 
-	{// stream depth
+	while(true){// stream depth
 		while(!device.getDepth(depthConvertedToShow)){;}
 		cv::imshow("depth", depthConvertedToShow);
 		/*
