@@ -21,16 +21,25 @@
 
 
 
-#include "udpSocket.h"
+//#include "udpSocket.h"
 #include "dtm.h"
 #include "MyMutex.h"
 
 using namespace cv;
 using namespace std;
 
-using namespace NUdpSocket;
+//using namespace NUdpSocket;
 
+typedef unsigned char TUByte;
+typedef unsigned short int TUWord;
+typedef unsigned int TUDWord;
+typedef int TSDWord;
+typedef char* TString;
 
+//constant
+//static const TUDWord WAIT_FOREVER(-1);
+//static const TUDWord MAX_NUM_CHARS(255);
+//static const TUDWord KINECT_FRAME_SIZE(640*480);
 
 
 static const TUDWord CHUNK_SIZE(60000); //60k byte

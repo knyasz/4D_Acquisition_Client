@@ -164,7 +164,8 @@ CFLAGS= -std=c++11 -fPIC -g -Wall
 # Target rules
 all:build
 
-build:Client
+#build:Client
+build:Acquisition
 
 
 
@@ -176,12 +177,15 @@ build:Client
 	@$(NVCC) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $< $(LIBRARIES)
 #	@$(NVCC)$(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $< $(LIBRARIES)
  
-Client:$(OBJS)
+#Client:$(OBJS)
+Acquisition:$(OBJS)
 	@$(NVCC)$(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES) $(UDP_SOCKET)
 
 run:build
-	./Client
+#	./Client
+	./Acquisition
 
 clean:
-	rm -f Client *.o 
+#	rm -f Client *.o 
+	rm -f Acquisition *.o 
 clobber:clean
