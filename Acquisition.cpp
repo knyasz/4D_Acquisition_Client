@@ -11,6 +11,9 @@
 
 // System includes
 #include <iostream>
+#include <cstring>
+#include <string>
+#include "stdlib.h"//for system()
 #include "time.h"
 #include "math.h"
 
@@ -29,6 +32,18 @@ void my_abort(int err)
 {
     cout << "Test FAILED\n";
     MPI_Abort(MPI_COMM_WORLD, err);
+}
+string GetIP(const char * command){
+	string str("empty");
+	FILE * fp = popen(command, "r");
+	if (!fp){
+		return str;
+	}
+	char *p=NULL, *e; size_t n;
+	while ((getline(&p, &n, fp) > 0) && p){}
+	fclose(fp);
+	return str = p;
+
 }
 // Error handling macros
 #define MPI_CHECK(call) \
@@ -49,38 +64,40 @@ int main(int argc, char **argv) {
     MPI_CHECK(MPI_Comm_size(MPI_COMM_WORLD, &commSize));
     MPI_CHECK(MPI_Comm_rank(MPI_COMM_WORLD, &commRank));
 
-    cout<<"MPI commSize = "<< commSize << endl;
-    cout<<"MPI commRank = "<< commRank << endl;
+    cout<<"MPI commSize = "<< commSize << "  MPI commRank = "<< commRank << GetIP("ifconfig | grep addr:10")<<endl;
 
     if(commRank != 0){
+		try{
 
-		Freenect::Freenect freenect;
-		MyFreenectDevice& device = freenect.createDevice<MyFreenectDevice>(0);
+			Freenect::Freenect freenect;
+			MyFreenectDevice& device = freenect.createDevice<MyFreenectDevice>(0);
+		//	namedWindow("rgb", CV_WINDOW_AUTOSIZE);
+			namedWindow("depth", CV_WINDOW_AUTOSIZE);
 
-	//	namedWindow("rgb", CV_WINDOW_AUTOSIZE);
-		namedWindow("depth", CV_WINDOW_AUTOSIZE);
+		//	device.startVideo();
+			device.startDepth();
 
-	//	device.startVideo();
-		device.startDepth();
-
-	//	//Mat depthFromKinect(Size(640, 480), CV_16UC1);
-		Mat depthConvertedToShow(Size(640, 480), CV_8UC1);
-	//	Mat rgbMat(Size(640, 480), CV_8UC3, Scalar(0));
+		//	//Mat depthFromKinect(Size(640, 480), CV_16UC1);
+			Mat depthConvertedToShow(Size(640, 480), CV_8UC1);
+		//	Mat rgbMat(Size(640, 480), CV_8UC3, Scalar(0));
 
 
-		while(true){// stream depth
-			while(!device.getDepth(depthConvertedToShow)){;}
-			cv::imshow("depth", depthConvertedToShow);
-			/*
-			 * A common mistake for opencv newcomers
-			 * is to call cv::imshow() in a loop through video frames,
-			 * without following up each draw with cv::waitKey(30).
-			 * In this case, nothing appears on screen,
-			 * because highgui is never given time
-			 * to process the draw requests from cv::imshow()
-			 */
-			cvWaitKey(1);
-	}
+			while(true){// stream depth
+				while(!device.getDepth(depthConvertedToShow)){;}
+				cv::imshow("depth", depthConvertedToShow);
+				/*
+				 * A common mistake for opencv newcomers
+				 * is to call cv::imshow() in a loop through video frames,
+				 * without following up each draw with cv::waitKey(30).
+				 * In this case, nothing appears on screen,
+				 * because highgui is never given time
+				 * to process the draw requests from cv::imshow()
+				 */
+				cvWaitKey(1);
+			}
+		}catch(std::runtime_error e){
+			cout<<commRank<<"  :  "<<e.what()<<endl;
+		}
 
 //	{//stream RGB
 //		while(!device.getVideo(rgbMat)){;}
