@@ -72,7 +72,7 @@ LDFLAGS     :=
 EXTRA_NVCCFLAGS   ?= 
 EXTRA_LDFLAGS     ?=	
 EXTRA_CCFLAGS     ?= 
-
+sz
 # OS-specific build flags
 ifneq ($(DARWIN),)
   LDFLAGS += -rpath $(CUDA_PATH)/lib
@@ -155,7 +155,7 @@ endif
 
 OBJS=$(patsubst %.cpp,%.o,$(wildcard *.cpp))
 OBJS+=$(patsubst %.cu,%.o,$(wildcard *.cu))
-objs+=$(UDP_SOCKET)
+OBJS+=$(UDP_SOCKET)
 
 CFLAGS= -std=c++11 -fPIC -g -Wall
  
