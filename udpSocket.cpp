@@ -13,7 +13,7 @@
 #include "udpSocket.h"
 
 //tiny xml include
-#include <tinyxml.h>
+#include "tinyxml.h"
 
 //using section
 using namespace NUdpSocket;
