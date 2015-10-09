@@ -41,8 +41,8 @@ namespace NUdpMessages
                 NUdpSocket::TUWord  padding;
 
 		SHeader() :
-			sync(0xA5A5)
-                        padding = 0;
+			sync(0xA5A5),
+                        padding(0)
 		{};
 	};
 
