@@ -87,7 +87,15 @@ bool MyUDPStreamer::getFirstSyncFromHost(){
 		return false;
 	}
 
+	SAck ack;
+	ack.opCode = OP_ACK_SND;
+	ack.size = sizeof(SAck);
+
 	currTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+
+	ack.timeStamp = currTime;
+
+	sendData(reinterpret_cast<TUByte*>(&ack), sizof(ack));
 
 	TReal64 delta = 1 - (currTime - static_cast<TUDWord>(currTime));
 
