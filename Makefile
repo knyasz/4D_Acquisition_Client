@@ -72,7 +72,7 @@ LDFLAGS     :=
 EXTRA_NVCCFLAGS   ?= 
 EXTRA_LDFLAGS     ?=	
 EXTRA_CCFLAGS     ?= 
-sz
+
 # OS-specific build flags
 ifneq ($(DARWIN),)
   LDFLAGS += -rpath $(CUDA_PATH)/lib
@@ -155,7 +155,7 @@ endif
 
 OBJS=$(patsubst %.cpp,%.o,$(wildcard *.cpp))
 OBJS+=$(patsubst %.cu,%.o,$(wildcard *.cu))
-OBJS+=$(UDP_SOCKET)
+#OBJS+=$(UDP_SOCKET)
 
 CFLAGS= -std=c++11 -fPIC -g -Wall
  
@@ -168,15 +168,13 @@ build:Client
 
 
 %.o:%.cpp
-#	@$(NVCC)  $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $< $(LIBRARIES)
-#	@$(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $< $(LIBRARIES)
 	@$(GCC) $(CFLAGS) $(INCLUDES) -o $@ -c $< $(LIBRARIES)
 %.o:%.cu
 	@$(NVCC) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $< $(LIBRARIES)
-#	@$(NVCC)$(INCLUDES) $(ALL_CCFLAGS) $(GGCCENCODE_FLAGS) -o $@ -c $< $(LIBRARIES)
  
 Client:$(OBJS)
-	@$(NVCC)$(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES) $(UDP_SOCKET)
+#	@$(NVCC)$(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES) $(UDP_SOCKET)
+	@$(NVCC)$(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES)
 
 run:build
 	./Client

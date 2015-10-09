@@ -132,7 +132,7 @@ namespace NUdpSocket
         //desc  : closes open socket
         //arg   : -  
         //return: true if open ok false if not 
-        ///////////////////////////////////////
+        ///////////////////////////////////////nt.cpp:9:
         bool closeSocket();
 
         ////////////////////////////////////////
