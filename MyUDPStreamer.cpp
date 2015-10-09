@@ -53,11 +53,13 @@ bool MyUDPStreamer::sendKinectFrameUDP(	TUByte* buffer,
 }
 bool MyUDPStreamer::getFirstSyncFromHost(){
 	SStart receiveBuffer;
+	TUDWord sizeToReceive = sizeof(SStart);
 	TSDWord uSecdelayTime = 10*1000*1000;//10sec
 	if (	! receiveData(	reinterpret_cast<TUByte*>(&receiveBuffer),
-							sizeof(SStart),
+							sizeToReceive,
 							uSecdelayTime)				 ) {
-		cout<<"MyUDPStreamer::getFirstSyncFromHost - receive timed out "<<endl;
+		printf("MyUDPStreamer::getFirstSyncFromHost - receive timed out ");
+		printf("received %d Bytes instead of %d",sizeToReceive, sizeof(SStart) );
 		return false;
 	}
 	if (receiveBuffer.sync != SYNC  || receiveBuffer.opCode != OP_START_SND){
