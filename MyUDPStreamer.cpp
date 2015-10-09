@@ -94,10 +94,10 @@ bool MyUDPStreamer::getFirstSyncFromHost(){
 	ack.size = sizeof(SAck);
 
 	currTime = timeNow();
-	printf("Corrent time is %lf \n", currTime);
 	ack.timeStamp = currTime;
+	printf("ack.timeStamp is %lf \n", ack.timeStamp);
 
-	sendData(reinterpret_cast<TUByte*>(&ack), sizeof(SHeader));
+	//sendData(reinterpret_cast<TUByte*>(&ack), sizeof(SHeader));
 	sendData(reinterpret_cast<TUByte*>(&(ack.timeStamp)), sizeof(ack.timeStamp));
 
 	TReal64 delta = 1 - (currTime - static_cast<TUDWord>(currTime));
