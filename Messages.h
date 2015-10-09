@@ -38,9 +38,11 @@ namespace NUdpMessages
 		NUdpSocket::TUDWord size;
 		NUdpSocket::TUDWord opCode;
 		NUdpSocket::TUDWord checksum;
+                NUdpSocket::TUWord  padding;
 
 		SHeader() :
 			sync(0xA5A5)
+                        padding = 0;
 		{};
 	};
 
