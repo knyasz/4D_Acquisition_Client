@@ -95,7 +95,7 @@ bool MyUDPStreamer::getFirstSyncFromHost(){
 
 	ack.timeStamp = currTime;
 
-	sendData(reinterpret_cast<TUByte*>(&ack), sizof(ack));
+	sendData(reinterpret_cast<TUByte*>(&ack), sizeof(ack));
 
 	TReal64 delta = 1 - (currTime - static_cast<TUDWord>(currTime));
 
