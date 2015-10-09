@@ -9,6 +9,7 @@
 namespace NUdpMessages
 {
 	static const NUdpSocket::TUDWord CHUNK_SIZE(64000);
+	static const NUdpSocket::TUWord SYNC(0xA5A5);
 	enum EOpCodesSend
 	{
 		OP_ACK_SND = 0,
@@ -53,7 +54,7 @@ namespace NUdpMessages
 	struct SFrameDep : public SHeader
 	{
 		NUdpSocket::TReal64 timeStamp;
-		NUdpSocket::TUByte byteVector[NUdpSocket::KINECT_FRAME_SIZE];
+		NUdpSocket::TUByte byteVector[NUdpSocket::KINECT_FRAME_GRAY_SIZE];
 	};
 
 	struct SFrameRGB : public SHeader

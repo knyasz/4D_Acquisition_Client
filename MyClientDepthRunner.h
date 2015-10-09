@@ -9,6 +9,9 @@
 #define MYCLIENTDEPTHRUNNER_H_
 
 #include "MyClientRunnerI.h"
+#include "Messages.h"
+
+using namespace NUdpMessages;
 
 class MyClientDepthRunner: public virtual MyClientRunner_I {
 public:

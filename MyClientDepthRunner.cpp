@@ -18,7 +18,7 @@ MyClientDepthRunner::MyClientDepthRunner(MyFreenectDevice& device):
 						"10.0.0.1",
 						50555,
 						50555,
-						KINECT_FRAME_SIZE,
+						KINECT_FRAME_GRAY_SIZE,
 						"IR Video Img");
 	if(!m_udp_streamer.InitSocket(conf)){
 		throw Exception(
@@ -47,7 +47,7 @@ void MyClientDepthRunner::AllocateAndSendFrame (){
 				"Runner is not initialized",
 				"MyClientDepthRunner::AllocateAndSendFrame",
 				"MyClientDepthRunner",
-				34);
+				__LINE__);
 	}
 	pMat = new Mat(Size(640, 480), CV_16UC1);
 	uint retries=0;
@@ -65,7 +65,8 @@ void MyClientDepthRunner::AllocateAndSendFrame (){
 	while(	!m_udp_streamer.sendKinectFrameUDP(
 								static_cast<TUByte*>(pMat->data),
 								CHUNK_SIZE,
-								KINECT_FRAME_SIZE)				){;}
+								KINECT_FRAME_GRAY_SIZE,
+								NUdpMessages::EOpCodesSend::OP_FRAME_DEP_SND)				){;}
 	pushToPipe(pMat);
 	mAllocateCounter.PrintoutEventsCounted();
 }

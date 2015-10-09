@@ -50,6 +50,7 @@ public:
 	virtual bool AllocateAndSendFrameRun();
 	virtual bool showAndDeallocateFrameRun();
 	virtual void AllocateAndSendFrame() = 0;
+	virtual bool syncUDPWithHost();
 protected:
 	virtual bool showAndDeallocateFrameSucessfully();
 	virtual void pushToPipe(Mat * pMat);

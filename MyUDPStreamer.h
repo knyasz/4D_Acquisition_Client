@@ -4,8 +4,10 @@
 
 #include "MyFreenectDevice.h"
 #include "udpSocket.h"
+#include "Messages.h"
 
 using namespace NUdpSocket;
+using namespace NUdpMessages;
 
 class MyUDPStreamer {
 public:
@@ -21,13 +23,22 @@ public:
 	}
 	virtual bool sendKinectFrameUDP(	TUByte* buffer,
 										TUDWord chunkSize,
-										const TUDWord totSize);
+										const TUDWord totSize,
+										EOpCodesSend opCode);
+	virtual bool getFirstSyncFromHost(	);
+
 private:
 	bool sendData(TUByte* buffer,TUDWord size) {
 		if (!m_socket.isOpened() || !m_socket.isConfiguref()){
 			return false;
 		}
 		return m_socket.sendData(buffer,size);
+	}
+	bool receiveData(TUByte* buffer,TUDWord size,TSDWord timeOut){
+		if (!m_socket.isOpened() || !m_socket.isConfiguref()){
+			return false;
+		}
+		return m_socket.reciveData(buffer, size, timeOut);
 	}
 private:
 	CUdpSocket m_socket;

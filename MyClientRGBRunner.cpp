@@ -18,7 +18,7 @@ MyClientRGBRunner::MyClientRGBRunner(MyFreenectDevice& device):
 						"10.0.0.1",
 						70777,
 						70777,
-						KINECT_FRAME_SIZE,
+						KINECT_FRAME_GRAY_SIZE,
 						"IR Video Img");
 	if(!m_udp_streamer.InitSocket(conf)){
 		throw Exception(
@@ -66,7 +66,8 @@ void MyClientRGBRunner::AllocateAndSendFrame (){
 	while(	!m_udp_streamer.sendKinectFrameUDP(
 								static_cast<TUByte*>(pMat->data),
 								CHUNK_SIZE,
-								KINECT_FRAME_SIZE)				){;}
+								KINECT_FRAME_RGB_SIZE,
+								NUdpMessages::EOpCodesSend::OP_FRAME_DEP_SND)				){;}
 	pushToPipe(pMat);
 	mAllocateCounter.PrintoutEventsCounted();
 

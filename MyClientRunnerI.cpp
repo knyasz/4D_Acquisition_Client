@@ -113,4 +113,12 @@ bool MyClientRunner_I::showAndDeallocateFrameRun(){
 								this)
 															) == 0;
 }
+bool MyClientRunner_I::syncUDPWithHost(){
+	TUDWord numOfRetries=RETRIES_LIMIT;
+	while( !m_udp_streamer.getFirstSyncFromHost()) {
+		numOfRetries--;
+		return false;
+	}
+	return true;
+}
 

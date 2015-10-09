@@ -33,7 +33,7 @@ using namespace NUdpSocket;
 
 
 
-static const TUDWord CHUNK_SIZE(60000); //60k byte
+
 static const TUDWord DELAY_SEND(6000); //U SEC
 static const TUDWord KINECT_ROWS(480);
 static const TUDWord KINECT_COLS(640);
@@ -52,7 +52,7 @@ static void showFPS(){
 
 static TUDWord countGlobal;
 
-class MyFreenectDevice: public Freenect::FreenectDevice {
+class MyFreenectDevice: public Freenect::FreenectDevice {KINECT_FRAME_GRAY_SIZE
 public:
 
 

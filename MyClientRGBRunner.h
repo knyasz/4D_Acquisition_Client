@@ -9,6 +9,9 @@
 #define MYCLIENTRGBRUNNER_H_
 
 #include "MyClientRunnerI.h"
+#include "Messages.h"
+
+using namespace NUdpMessages;
 
 using namespace NUdpSocket;
 

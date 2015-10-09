@@ -16,6 +16,10 @@ int main(int argc, char **argv) {
 	MyClientDepthRunner Depth(device);
 
 
+	if(!Depth.syncUDPWithHost()){
+		return 1;
+	}
+
 	if(!Depth.AllocateAndSendFrameRun()){
 		return 1;
 	}
