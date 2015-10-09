@@ -97,7 +97,8 @@ bool MyUDPStreamer::getFirstSyncFromHost(){
 	printf("Corrent time is %lf \n", currTime);
 	ack.timeStamp = currTime;
 
-	sendData(reinterpret_cast<TUByte*>(&ack), sizeof(ack));
+	sendData(reinterpret_cast<TUByte*>(&ack), sizeof(SHeader));
+	sendData(reinterpret_cast<TUByte*>(&ack.timeStamp), sizeof(ack.timeStamp));
 
 	TReal64 delta = 1 - (currTime - static_cast<TUDWord>(currTime));
 
