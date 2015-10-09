@@ -94,7 +94,7 @@ bool MyUDPStreamer::getFirstSyncFromHost(){
 	ack.size = sizeof(SAck);
 
 	currTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-
+	printf("Corrent time is %lf \n", currTime);
 	ack.timeStamp = currTime;
 
 	sendData(reinterpret_cast<TUByte*>(&ack), sizeof(ack));
