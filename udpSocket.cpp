@@ -192,7 +192,7 @@ bool CUdpSocket::sendData(TUByte* buffer, TUDWord size)
 //desc  : recives data sequence
 //arg   : buffer - buffer to fill
 //      : size: recived data size (the buffer size that is given)
-//        to - timeout in mili seconds
+//        to - timeout in micro seconds
 //return: true if recived ok false if not 
 ///////////////////////////////////////
 bool CUdpSocket::reciveData( TUByte*  buffer, TUDWord& size,TSDWord to)

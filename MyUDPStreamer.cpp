@@ -53,7 +53,7 @@ bool MyUDPStreamer::sendKinectFrameUDP(	TUByte* buffer,
 }
 bool MyUDPStreamer::getFirstSyncFromHost(){
 	SStart receiveBuffer;
-	TSDWord uSecdelayTime = 10*1000;//10sec
+	TSDWord uSecdelayTime = 10*1000*1000;//10sec
 	if (	! receiveData(	reinterpret_cast<TUByte*>(&receiveBuffer),
 							sizeof(SStart),
 							uSecdelayTime)				 ) {
@@ -99,12 +99,12 @@ bool MyUDPStreamer::getFirstSyncFromHost(){
 
 	TReal64 delta = 1 - (currTime - static_cast<TUDWord>(currTime));
 
-	// after the start was received we want to wait to a whole second before
-	//start sending the frames to the
-	//host so this delta is the delta before the current time and a whole second ,
-	//we need to mult it by 1000
-	//to get the number of milli seconds that we need to wait for that
-	usleep(static_cast<TUDWord>(delta*1000));
+	// after the start was received we want to wait to a round second before
+	//start sending the frames to the host,
+	//so this delta is the delta before the current time and a round second ,
+	//we need to mult it by 1000*1000
+	//to get the number of micro seconds that we need to wait for that
+	usleep(static_cast<TUDWord>(delta*1000*1000));
 	return true;
 }
 
