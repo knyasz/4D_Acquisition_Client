@@ -58,8 +58,8 @@ bool MyUDPStreamer::getFirstSyncFromHost(){
 	if (	! receiveData(	reinterpret_cast<TUByte*>(&receiveBuffer),
 							sizeToReceive,
 							uSecdelayTime)				 ) {
-		printf("MyUDPStreamer::getFirstSyncFromHost - receive timed out ");
-		printf("received %d Bytes instead of %d",sizeToReceive, sizeof(SStart) );
+		printf("MyUDPStreamer::getFirstSyncFromHost - receive timed out \n");
+		printf("received %d Bytes instead of %d  \n",sizeToReceive, sizeof(SStart) );
 		return false;
 	}
 	if (receiveBuffer.sync != SYNC  || receiveBuffer.opCode != OP_START_SND){

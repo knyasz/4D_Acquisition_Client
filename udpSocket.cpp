@@ -201,6 +201,9 @@ bool CUdpSocket::reciveData( TUByte*  buffer, TUDWord& size,TSDWord to)
     struct sockaddr_in currCli;
     static TUDWord clientLen(sizeof(currCli));
     TSDWord status(1);
+    TUDWord sz(size);
+
+    size = 0;
   
     //memset(buffer,0,size);
     
@@ -215,7 +218,7 @@ bool CUdpSocket::reciveData( TUByte*  buffer, TUDWord& size,TSDWord to)
     
     if (status > 0)
     {
-        status = handelError(recvfrom(m_socket,buffer,size,0,
+        status = handelError(recvfrom(m_socket,buffer,sz,0,
                                             (struct sockaddr *) &currCli,&clientLen));
         if (status > 0)
         {
