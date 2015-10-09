@@ -1,10 +1,13 @@
 #include <cv.h>
 #include <cxcore.h>
-#include <highgui.h> 
+#include <highgui.h>
+#include <chrono>
+#include "udpSocket.h"
 
 #ifndef _UDPMsg_H
 #define	_UDPMsg_H
 #pragma pack(push,1)
+
 
 namespace NUdpMessages
 {
@@ -69,5 +72,15 @@ namespace NUdpMessages
 	};
 }
 #pragma pack(pop)
+
+	static NUdpSocket::TReal64 timeNow()
+	{
+		auto time = std::chrono::system_clock::now();
+
+		NUdpSocket::TReal64 realTimeMilli =  std::chrono::duration_cast<std::chrono::milliseconds>
+								 (time.time_since_epoch()).count();
+		return realTimeMilli/1000.;
+
+	}
 
 #endif

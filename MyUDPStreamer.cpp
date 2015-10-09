@@ -69,7 +69,7 @@ bool MyUDPStreamer::getFirstSyncFromHost(){
 		return false;
 	}
 
-	TReal64 currTime(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()));
+	TReal64 currTime(timeNow());
 
 	if (currTime < receiveBuffer.timeStamp)
 	{
@@ -93,7 +93,7 @@ bool MyUDPStreamer::getFirstSyncFromHost(){
 	ack.opCode = OP_ACK_SND;
 	ack.size = sizeof(SAck);
 
-	currTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+	currTime = timeNow();
 	printf("Corrent time is %lf \n", currTime);
 	ack.timeStamp = currTime;
 
@@ -103,7 +103,7 @@ bool MyUDPStreamer::getFirstSyncFromHost(){
 
 	// after the start was received we want to wait to a round second before
 	//start sending the frames to the host,
-	//so this delta is the delta before the current time and a round second ,
+	//so this delta is the  delta before the current time and a round second ,
 	//we need to mult it by 1000*1000
 	//to get the number of micro seconds that we need to wait for that
 	usleep(static_cast<TUDWord>(delta*1000*1000));
