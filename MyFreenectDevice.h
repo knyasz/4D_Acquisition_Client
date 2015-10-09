@@ -52,7 +52,7 @@ static void showFPS(){
 
 static TUDWord countGlobal;
 
-class MyFreenectDevice: public Freenect::FreenectDevice {KINECT_FRAME_GRAY_SIZE
+class MyFreenectDevice: public Freenect::FreenectDevice {
 public:
 
 

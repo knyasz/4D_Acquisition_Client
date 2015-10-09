@@ -51,7 +51,7 @@ bool MyUDPStreamer::sendKinectFrameUDP(	TUByte* buffer,
 	return rv;
 
 }
-virtual bool MyUDPStreamer::getFirstSyncFromHost(){
+bool MyUDPStreamer::getFirstSyncFromHost(){
 	SStart receiveBuffer;
 	TSDWord uSecdelayTime = 10*1000;//10sec
 	if (	! receiveData(reinterpret_cast<TUByte*>(&receiveBuffer),
