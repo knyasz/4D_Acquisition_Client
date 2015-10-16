@@ -19,12 +19,13 @@ bool MyUDPStreamer::sendKinectFrameUDP(	TUByte* buffer,
 	TUDWord packet(0);
         
         //send header before you send anything else
-        NUdpMessages::SHeader header;
+        NUdpMessages::SLine0 line0;
 //        header.opCode = NUdpMessages::EOpCodesSend::OP_FRAME_DEP_SND;
-        header.opCode = opCode;
-        header.size = totSize;
-        header.checksum = 0xabcdef00;
-        sendData(reinterpret_cast<TUByte*>(&header), sizeof(NUdpMessages::SHeader));
+        line0.opCode = opCode;
+        line0.size = totSize;
+        line0.checksum = 0xabcdef00; //nothing important for now
+        line0.timeStamp = timeNow();
+        sendData(reinterpret_cast<TUByte*>(&line0), sizeof(NUdpMessages::SLine0));
 
 	while ((status) && (bytesLeft > 0)) {
 		TUDWord currChunk=
@@ -54,7 +55,7 @@ bool MyUDPStreamer::sendKinectFrameUDP(	TUByte* buffer,
 bool MyUDPStreamer::getFirstSyncFromHost(){
 	SStart receiveBuffer;
 	TUDWord sizeToReceive = sizeof(SStart);
-	TSDWord uSecdelayTime = 10*1000*1000;//10sec
+	TSDWord uSecdelayTime = 60*1000*1000;//60sec
 	if (	! receiveData(	reinterpret_cast<TUByte*>(&receiveBuffer),
 							sizeToReceive,
 							uSecdelayTime)				 ) {
@@ -92,15 +93,13 @@ bool MyUDPStreamer::getFirstSyncFromHost(){
 	SAck ack;
 	ack.opCode = OP_ACK_SND;
 	ack.size = sizeof(SAck);
-
 	currTime = timeNow();
 	ack.timeStamp = currTime;
-	printf("ack.timeStamp is %lf \n", ack.timeStamp);
 
-	sendData(reinterpret_cast<TUByte*>(&ack), sizeof(SHeader));
-	printf("ack.timeStamp is %lf \n", ack.timeStamp);
-//	sendData(reinterpret_cast<TUByte*>(&(ack.timeStamp)), sizeof(ack.timeStamp));
-	sendData(reinterpret_cast<TUByte*>(&(currTime)), sizeof(currTime));
+	//printf("ack.timeStamp is %lf \n", ack.timeStamp);
+
+	sendData(reinterpret_cast<TUByte*>(&ack), sizeof(SAck));
+
 
 	TReal64 delta = 1 - (currTime - static_cast<TUDWord>(currTime));
 
