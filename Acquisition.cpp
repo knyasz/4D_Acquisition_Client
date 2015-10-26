@@ -54,9 +54,27 @@ string GetIP(const char * command){
 
 
 int main(int argc, char **argv) {
+	/*
+	Freenect::Freenect freenect;
+	MyFreenectDevice& device = freenect.createDevice<MyFreenectDevice>(0);
+	namedWindow("depth", CV_WINDOW_AUTOSIZE);
+	device.startDepth();
+	Mat depthConvertedToShow(Size(640, 480), CV_8UC1);
+	while(true){// stream depth
+		while(!device.getDepth(depthConvertedToShow)){;}
+		cv::imshow("depth", depthConvertedToShow);
+		 //A common mistake for opencv newcomers
+		 //is to call cv::imshow() in a loop through video frames,
+		 //without following up each draw with cv::waitKey(30).
+		 //In this case, nothing appears on screen,
+		 //because highgui is never given time
+		 //to process the draw requests from cv::imshow()
+		cvWaitKey(1);
+	}
+	cvDestroyWindow("depth");
+	*/
 
-
-    // Initialize MPI state
+     // Initialize MPI state
     MPI_CHECK(MPI_Init(&argc, &argv));
 
     // Get our MPI node number and node count
@@ -64,7 +82,10 @@ int main(int argc, char **argv) {
     MPI_CHECK(MPI_Comm_size(MPI_COMM_WORLD, &commSize));
     MPI_CHECK(MPI_Comm_rank(MPI_COMM_WORLD, &commRank));
 
-    cout<<"MPI commSize = "<< commSize << "  MPI commRank = "<< commRank << GetIP("ifconfig | grep addr:10")<<endl;
+    if(commRank == 0){
+		cout<<"MPI commSize = "<< commSize << "  MPI commRank = "<<
+				commRank << GetIP("ifconfig | grep addr:10")<<endl;
+    }
 
     if(commRank != 0){
 		try{
@@ -72,7 +93,7 @@ int main(int argc, char **argv) {
 			Freenect::Freenect freenect;
 			MyFreenectDevice& device = freenect.createDevice<MyFreenectDevice>(0);
 		//	namedWindow("rgb", CV_WINDOW_AUTOSIZE);
-			namedWindow("depth", CV_WINDOW_AUTOSIZE);
+//			namedWindow("depth", CV_WINDOW_AUTOSIZE);
 
 		//	device.startVideo();
 			device.startDepth();
@@ -84,45 +105,43 @@ int main(int argc, char **argv) {
 
 			while(true){// stream depth
 				while(!device.getDepth(depthConvertedToShow)){;}
-				cv::imshow("depth", depthConvertedToShow);
-				/*
-				 * A common mistake for opencv newcomers
-				 * is to call cv::imshow() in a loop through video frames,
-				 * without following up each draw with cv::waitKey(30).
-				 * In this case, nothing appears on screen,
-				 * because highgui is never given time
-				 * to process the draw requests from cv::imshow()
-				 */
-				cvWaitKey(1);
+				cout<<"MPI commSize = "<< commSize << "  MPI commRank = "<<
+						commRank << GetIP("ifconfig | grep addr:10")<<endl;
+				printf("commRanc[%d] got frame from kinect. \n",commRank);
+//				cv::imshow("depth", depthConvertedToShow);
+				 //A common mistake for opencv newcomers
+				 //is to call cv::imshow() in a loop through video frames,
+				 //without following up each draw with cv::waitKey(30).
+				 //In this case, nothing appears on screen,
+				 //because highgui is never given time
+				 //to process the draw requests from cv::imshow()
+//				cvWaitKey(1);
 			}
 		}catch(std::runtime_error e){
-			cout<<commRank<<"  :  "<<e.what()<<endl;
+			cout<<"Exception: "<<commRank<<"  :  "<<e.what()<<endl;
 		}
 
-//	{//stream RGB
-//		while(!device.getVideo(rgbMat)){;}
-//		cv::imshow("rgb", rgbMat);
-//		/*
-//		 * A common mistake for opencv newcomers
-//		 * is to call cv::imshow() in a loop through video frames,
-//		 * without following up each draw with cv::waitKey(30).
-//		 * In this case, nothing appears on screen,
-//		 * because highgui is never given time
-//		 * to process the draw requests from cv::imshow()
-//		 */
-//		cvWaitKey(1);
-//	}
+		//	{//stream RGB
+		//		while(!device.getVideo(rgbMat)){;}
+		//		cv::imshow("rgb", rgbMat);
+		//		  //A common mistake for opencv newcomers
+		//		  //is to call cv::imshow() in a loop through video frames,
+		//		  //without following up each draw with cv::waitKey(30).
+		//		  //In this case, nothing appears on screen,
+		//		  //because highgui is never given time
+		//		  //to process the draw requests from cv::imshow()
+		//		cvWaitKey(1);
+		//	}
 
-//	cvDestroyWindow("rgb");
-	cvDestroyWindow("depth");
+		//	cvDestroyWindow("rgb");
+//	cvDestroyWindow("depth");
     }
-
+    MPI_Barrier(MPI_COMM_WORLD);
     MPI_CHECK(MPI_Finalize());
 
     if (commRank == 0)
     {
         cout << "PASSED\n";
     }
-
     return 0;
 }
