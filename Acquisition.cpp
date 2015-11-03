@@ -56,25 +56,6 @@ string GetIP(const char * command){
 
 
 int main(int argc, char **argv) {
-	/*
-	Freenect::Freenect freenect;
-	MyFreenectDevice& device = freenect.createDevice<MyFreenectDevice>(0);
-	namedWindow("depth", CV_WINDOW_AUTOSIZE);
-	device.startDepth();
-	Mat depthConvertedToShow(Size(640, 480), CV_8UC1);
-	while(trstatic_cast<TUByte*>(pMat->data)ue){// stream depth
-		while(!device.getDepth(depthConvertedToShow)){;}
-		cv::imshow("depth", depthConvertedToShow);
-		 //A common mistake for opencv newcomers
-		 //is to call cv::imshow() in a loop through video frames,
-		 //without following up each draw with cv::waitKey(30).
-		 //In this case, nothing appears on screen,
-		 //because highgui is never given time
-		 //to process the draw requests from cv::imshow()
-		cvWaitKey(1);
-	}
-	cvDestroyWindow("depth");
-	*/
 
      // Initialize MPI state
     MPI_CHECK(MPI_Init(&argc, &argv));
@@ -101,125 +82,58 @@ int main(int argc, char **argv) {
 
 
     const int ROOT_ID = 0;
-    const int DepthFrameTag = 100;
     MPI_Status status;
-//	Mat depthConvertedToShow(Size(640, 480), CV_8UC1);
-
-	const uint KINECT_FRAME_SIZE = 640*480;
-	uint8_t * pFrame = NULL;
-
-	char msgToSend[200];
-	char* msgToReceive;
+    MPI_Request request;
 	const int msgTag=200;
+	int * msg = new int(0);
+	int sendReceiveFlag=0;
 
 
 
 
 	try{
 		if(commRank != ROOT_ID){
-
-//			Freenect::Freenect freenect;
-//			MyFreenectDevice& device = freenect.createDevice<MyFreenectDevice>(0);
-
-
-		//	device.startVideo();
-//			device.startDepth();
-
-
-
-//			while(true)
-//			{// stream depth
-//				while(!device.getDepth(depthConvertedToShow)){;}
-				cout<<"MPI commSize = "<< commSize << "  MPI commRank = "<<
-						commRank << GetIP("ifconfig | grep addr:10")<<endl;
-				printf("commRanc[%d] got frame from kinect. \n",commRank);
-
-
-				strcpy(msgToSend,"Hello");
-				MPI_Bsend(	msgToSend,
-							8,
-							MPI_CHAR,
-							ROOT_ID,
-							msgTag,
-							MPI_COMM_WORLD);
-
-
-//				MPI_Send(	(const void*)depthConvertedToShow.data,
-//							KINECT_FRAME_SIZE,
-//							MPI_BYTE,
-//							ROOT_ID,
-//							DepthFrameTag,
-//							MPI_COMM_WORLD);
-				printf("commRanc[%d] sent frame from kinect. \n",commRank);
-//			}
-
-
-
+			printf("commRanc[%d], MPI commSize = %d, my IP  = %s\n",
+					commRank,commSize,GetIP("ifconfig | grep addr:10").c_str());
+			printf("commRanc[%d] Start sending... \n",commRank);
+			*msg=55;
+//			MPI_Isend(	msg,1,MPI_INT,ROOT_ID,msgTag,MPI_COMM_WORLD,&request);
+//			MPI_Send(	msg,1,MPI_INT,ROOT_ID,msgTag,MPI_COMM_WORLD);
+			MPI_Bsend(	msg,1,MPI_INT,ROOT_ID,msgTag,MPI_COMM_WORLD);
+			printf("commRanc[%d] sent frame . \n",commRank);
 		}else{//ROOT_ID
-			cout<<"MPI commSize = "<< commSize << "  MPI commRank From root = "
-					<< commRank << GetIP("ifconfig | grep addr:10")<<endl;
-			//	namedWindow("rgb", CV_WINDOW_AUTOSIZE);
-//			namedWindow("depth", CV_WINDOW_AUTOSIZE);
-//			while (true){
+			printf("commRanc[%d], MPI commSize = %d, my IP  = %s\n",
+					commRank,commSize,GetIP("ifconfig | grep addr:10").c_str());
 			int senderID=1;
-//				for(int senderID=1;senderID<commSize;++senderID){
-					msgToReceive = new char[200];
-					sleep(2);
-					printf("commRanc[%d] start receiving frame from [%d]. \n",
-							commRank,senderID);
-					MPI_Recv(	msgToReceive,
-								8,
-								MPI_CHAR,
-								senderID,
-								msgTag,
-								MPI_COMM_WORLD,
-								& status);
-//					MPI_Recv(	(void*)depthConvertedToShow.data,
-//								KINECT_FRAME_SIZE,
-//								MPI_BYTE,
-//								senderID,
-//								DepthFrameTag,
-//								MPI_COMM_WORLD,
-//								& status);
-				printf("commRanc[%d] received frame from [%d]. \n",
-						commRank,senderID);
-				printf("%s. \n",msgToReceive);
-				delete[]  msgToReceive;
-//					{//Stream Depth
-//						cv::imshow("depth", depthConvertedToShow);
-//						 //A common mistake for opencv newcomers
-//						 //is to call cv::imshow() in a loop through video frames,
-//						 //without following up each draw with cv::waitKey(30).
-//						 //In this case, nothing appears on screen,
-//						 //because highgui is never given time
-//						 //to process the draw requests from cv::imshow()
-//						cvWaitKey(1);
-//					}
+			printf("commRanc[%d] start receiving frame from [%d]. \n",
+					commRank,senderID);
+//			MPI_Irecv(	msg,1,MPI_INT,senderID,msgTag,MPI_COMM_WORLD,& request);
+			MPI_Recv(	msg,1,MPI_INT,senderID,msgTag,MPI_COMM_WORLD,&status);
 
-					//	{//stream RGB
-					//		while(!device.getVideo(rgbMat)){;}
-					//		cv::imshow("rgb", rgbMat);
-					//		  //A common mistake for opencv newcomers
-					//		  //is to call cv::imshow() in a loop through video frames,
-					//		  //without following up each draw with cv::waitKey(30).
-					//		  //In this case, nothing appears on screen,
-					//		  //because highgui is never given time
-					//		  //to process the draw requests from cv::imshow()
-					//		cvWaitKey(1);
-					//	}
-//				}
+			printf("commRanc[%d] received frame from [%d]. \n",
+					commRank,senderID);
+//			while(!sendReceiveFlag){
+//				MPI_Iprobe(senderID,msgTag,MPI_COMM_WORLD,&sendReceiveFlag,&status);
+//				printf("commRanc[%d] got flag[%d] \n",commRank,sendReceiveFlag);
+//				sleep(1);
 //			}
-//			cvDestroyWindow("depth");
-	//		cvDestroyWindow("rgb");
-
 		}
+//		MPI_Wait(&request,&status);
+		if (commRank != ROOT_ID){
+			printf("commRanc[%d]  Sent msg - %d. \n",commRank,*msg);
+		}else{
+			printf("commRanc[%d]  Received msg- %d. \n",commRank,*msg);
+		}
+		MPI_CHECK(MPI_Barrier(MPI_COMM_WORLD));
+		delete  msg;
+		MPI_CHECK(MPI_Finalize());
 	}catch(std::runtime_error &e){
 		cout<<"Exception: "<<commRank<<"  :  "<<e.what()<<endl;
+	}catch(...){
+		cout<<"some exception"<<endl;
 	}
 
 
-    MPI_CHECK(MPI_Barrier(MPI_COMM_WORLD));
-    MPI_CHECK(MPI_Finalize());
 
     if (commRank == 0)
     {
