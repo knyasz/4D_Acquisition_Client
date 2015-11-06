@@ -72,7 +72,7 @@ bool MyUDPStreamer::getFirstSyncFromHost(){
 
 	TReal64 currTime(timeNow());
 
-	if (NUdpMessages::isWithinTimeDelta(receiveBuffer.timeStamp))
+	if (!NUdpMessages::isWithinTimeDelta(receiveBuffer.timeStamp))
 	{
 		throw Exception(
 				CV_StsBackTrace,
