@@ -85,7 +85,9 @@ int main(int argc, char **argv) {
     MPI_Status status;
     MPI_Request request;
 	const int msgTag=200;
-	int * msg = new int(0);
+//	uint8_t * msg = new unsigned char(0);
+	int * msg = int(0);
+	printf("Created msg[%d]\n",*msg);
 	int sendReceiveFlag=0;
 
 
@@ -96,10 +98,10 @@ int main(int argc, char **argv) {
 			printf("commRanc[%d], MPI commSize = %d, my IP  = %s\n",
 					commRank,commSize,GetIP("ifconfig | grep addr:10").c_str());
 			printf("commRanc[%d] Start sending... \n",commRank);
-			*msg=55;
-//			MPI_Isend(	msg,1,MPI_INT,ROOT_ID,msgTag,MPI_COMM_WORLD,&request);
-//			MPI_Send(	msg,1,MPI_INT,ROOT_ID,msgTag,MPI_COMM_WORLD);
-			MPI_Bsend(	msg,1,MPI_INT,ROOT_ID,msgTag,MPI_COMM_WORLD);
+			*msg=1;
+			MPI_Isend(	msg,1,MPI_BYTE,ROOT_ID,msgTag,MPI_COMM_WORLD,&request);
+//			MPI_Send(	msg,1,MPI_BYTE,ROOT_ID,msgTag,MPI_COMM_WORLD);
+//			MPI_Bsend(	msg,1,MPI_BYTE,ROOT_ID,msgTag,MPI_COMM_WORLD);
 			printf("commRanc[%d] sent frame . \n",commRank);
 		}else{//ROOT_ID
 			printf("commRanc[%d], MPI commSize = %d, my IP  = %s\n",
@@ -107,8 +109,8 @@ int main(int argc, char **argv) {
 			int senderID=1;
 			printf("commRanc[%d] start receiving frame from [%d]. \n",
 					commRank,senderID);
-//			MPI_Irecv(	msg,1,MPI_INT,senderID,msgTag,MPI_COMM_WORLD,& request);
-			MPI_Recv(	msg,1,MPI_INT,senderID,msgTag,MPI_COMM_WORLD,&status);
+//			MPI_Irecv(	msg,1,MPI_BYTE,senderID,msgTag,MPI_COMM_WORLD,& request);
+			MPI_Recv(	msg,1,MPI_BYTE,senderID,msgTag,MPI_COMM_WORLD,&status);
 
 			printf("commRanc[%d] received frame from [%d]. \n",
 					commRank,senderID);
