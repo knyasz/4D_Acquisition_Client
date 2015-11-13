@@ -86,10 +86,9 @@ int main(int argc, char **argv) {
     MPI_Request request;
 	const int msgTag=200;
 //	uint8_t * msg = new unsigned char(0);
-	int * msg = int(0);
+	int * msg = new int(0);
 	printf("Created msg[%d]\n",*msg);
 	int sendReceiveFlag=0;
-
 
 
 
