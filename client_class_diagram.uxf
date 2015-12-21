@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<diagram program="umlet" version="13.3">
+  <zoom_level>10</zoom_level>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>110</x>
+      <y>150</y>
+      <w>120</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>FreenectDevice
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>20</x>
+      <y>220</y>
+      <w>290</w>
+      <h>130</h>
+    </coordinates>
+    <panel_attributes>MyFreenectDevice
+--
++getVideo(Mat&amp; output):bool
++getColorDist(Mat&amp; output):bool
++getWorldDataColor(Mat&amp; output):bool
++getDepth(Mat&amp; output):bool
++getDepthWithDist(Mat&amp; output):bool
++IsDepthFrameReadyDrop():bool</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>20</x>
+      <y>400</y>
+      <w>360</w>
+      <h>220</h>
+    </coordinates>
+    <panel_attributes>/AbstractClass/
+MyClientRunner_I
+--
+#m_device:MyFreenectDevice&amp;
+#m_udp_streamer:MyUDPStreamer
+#mAllocateCounter:MyEventsCounter
+#mShowCounter:MyEventsCounter
+#m_pipe_mutex:MyMutex
+#t_allocate_and_send:pthread_t
+#t_show_and_deallocate:pthread_t
+--
+/+virtual AllocateAndSendFrame()/
++syncUDPWithHost():bool
++showAndDeallocateFrameSucessfully():bool</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>100</x>
+      <y>340</y>
+      <w>30</w>
+      <h>80</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;60.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>450</x>
+      <y>360</y>
+      <w>290</w>
+      <h>110</h>
+    </coordinates>
+    <panel_attributes>MyUDPStreamer
+--
+-CUdpSocket m_socket
+--
++InitSocket( SSocketConfig&amp; conf):bool
++sendKinectFrameUDP(...):bool
++getFirstSyncFromHost():bool
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>370</x>
+      <y>420</y>
+      <w>100</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-
+m2=1</panel_attributes>
+    <additional_attributes>10.0;10.0;80.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>360</x>
+      <y>190</y>
+      <w>380</w>
+      <h>120</h>
+    </coordinates>
+    <panel_attributes>CUdpSocket
+--
++configureSocket(const SSocketConfig &amp;config):bool
++openSocket():bool
++closeSocket():bool
++reciveData(.TUByte* buffer,TUDWord&amp; size,...):bool
++sendData(TUByte* buffer,TUDWord size):bool
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>570</x>
+      <y>300</y>
+      <w>30</w>
+      <h>80</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;60.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>150</x>
+      <y>170</y>
+      <w>30</w>
+      <h>70</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;50.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>560</x>
+      <y>480</y>
+      <w>80</w>
+      <h>60</h>
+    </coordinates>
+    <panel_attributes>MyMutex
+--
++lock()
++unlock()</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>370</x>
+      <y>490</y>
+      <w>210</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-
+m2=1</panel_attributes>
+    <additional_attributes>10.0;10.0;190.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>450</x>
+      <y>550</y>
+      <w>270</w>
+      <h>70</h>
+    </coordinates>
+    <panel_attributes>MyEventsCounter
+--
++Init(eventName:string)
++virtual PrintoutEventsCounted()</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>370</x>
+      <y>570</y>
+      <w>100</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-
+m2=2</panel_attributes>
+    <additional_attributes>10.0;10.0;80.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>20</x>
+      <y>680</y>
+      <w>200</w>
+      <h>50</h>
+    </coordinates>
+    <panel_attributes>MyClientDepthRunner
+--
++AllocateAndSendFrame()</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>230</x>
+      <y>680</y>
+      <w>220</w>
+      <h>50</h>
+    </coordinates>
+    <panel_attributes>MyClientRGBRunner
+--
++AllocateAndSendFrame()</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>300</x>
+      <y>610</y>
+      <w>30</w>
+      <h>90</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;70.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>100</x>
+      <y>610</y>
+      <w>30</w>
+      <h>90</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;70.0</additional_attributes>
+  </element>
+</diagram>
