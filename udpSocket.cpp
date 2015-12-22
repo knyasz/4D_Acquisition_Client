@@ -21,7 +21,7 @@ using namespace NUdpSocket;
 //ctor
 CUdpSocket::CUdpSocket():
     m_portNum(-1), m_tgtPort(-1),m_socket(-1),
-    m_isConfigured(false), m_isOpen(false),m_maxDataSize(0),
+    m_isConfigured(false), m_isOpen(false),
 	m_rxBuffSize(0),m_txBuffSize(0)
 {
     strcpy(m_name," ");
@@ -39,7 +39,6 @@ bool CUdpSocket::configureSocket(const SSocketConfig &config)
 {
     bool rv(false);
     
-    m_maxDataSize = config.maxDataSize;
     
     if (!m_isConfigured)
     {
@@ -295,12 +294,7 @@ bool CUdpSocket::initFromFile(const char* fileName, const char* socketName)
 										if (elem->Attribute("TgtPort"))
 										{
 											conf.tgtPort = atoi(elem->Attribute("TgtPort"));
-											if (elem->Attribute("MaxBlockSize"))
-											{
-												conf.maxDataSize = atoi(elem->Attribute("MaxBlockSize"));
-												strcpy(conf.name,socketName);
-												rv = true;
-											}
+											rv = true;
 										}
 									}
 								}

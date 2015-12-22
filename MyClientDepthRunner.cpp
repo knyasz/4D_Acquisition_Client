@@ -9,25 +9,28 @@
 
 #include <highgui.h>
 
+
+
 using namespace cv;
 
-MyClientDepthRunner::MyClientDepthRunner(MyFreenectDevice& device):
-		MyClientRunner_I(device){
+MyClientDepthRunner::MyClientDepthRunner(	MyFreenectDevice& device,
+											MyUDPStreamer& udp_streamer):
+		MyClientRunner_I(device,udp_streamer){
 	m_window_name="Depth";
-	SSocketConfig conf(	"10.0.0.2",
-						"10.0.0.1",
-						50555,
-						50555,
-						KINECT_FRAME_GRAY_SIZE,
-						"IR Video Img");
-	if(!m_udp_streamer.InitSocket(conf)){
-		throw Exception(
-				CV_StsBackTrace,
-				"Can't initialize streamer socket",
-				"MyClientDepthRunner::MyClientDepthRunner",
-				"MyClientDepthRunner",
-				20);
-	}
+//	SSocketConfig conf(	"10.0.0.2",
+//						"10.0.0.1",
+//						50555,
+//						50555,
+//						KINECT_FRAME_GRAY_SIZE,
+//						"IR Video Img");
+//	if(!m_udp_streamer.InitSocket(conf)){
+//		throw Exception(
+//				CV_StsBackTrace,
+//				"Can't initialize streamer socket",
+//				"MyClientDepthRunner::MyClientDepthRunner",
+//				"MyClientDepthRunner",
+//				20);
+//	}
 	namedWindow(m_window_name, CV_WINDOW_AUTOSIZE);
 	m_device.startDepth();
 	mAllocateCounter.Init("Depth send");

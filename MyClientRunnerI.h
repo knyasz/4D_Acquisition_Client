@@ -23,9 +23,9 @@ using namespace std;
 
 using namespace NUdpSocket;
 
+
 static const uint PIPE_LENGTH(20);
 static const uint RETRIES_LIMIT(10);
-
 
 class MyClientRunner_I {
 public:
@@ -35,7 +35,7 @@ public:
 	static void* showAndDeallocateFrameThread(void * This);
 
 public:
-	MyClientRunner_I(MyFreenectDevice& device);
+	MyClientRunner_I(MyFreenectDevice& device, MyUDPStreamer& m_udp_streamer );
 	virtual ~MyClientRunner_I(){
 //		pthread_join(t_allocate_and_send,NULL);
 //		pthread_join(t_show_and_deallocate,NULL);
@@ -50,7 +50,6 @@ public:
 	virtual bool AllocateAndSendFrameRun();
 	virtual bool showAndDeallocateFrameRun();
 	virtual void AllocateAndSendFrame() = 0;
-	virtual bool syncUDPWithHost();
 protected:
 	virtual bool showAndDeallocateFrameSucessfully();
 	virtual void pushToPipe(Mat * pMat);
@@ -70,7 +69,7 @@ protected:
 	MyFreenectDevice& m_device;
 
 	bool m_runner_is_initialized;
-	MyUDPStreamer m_udp_streamer;
+	MyUDPStreamer& m_udp_streamer;
 	queue<Mat*> m_pipe;
 	MyMutex m_pipe_mutex;
 

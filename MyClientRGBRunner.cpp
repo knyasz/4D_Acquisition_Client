@@ -11,23 +11,24 @@
 
 using namespace cv;
 
-MyClientRGBRunner::MyClientRGBRunner(MyFreenectDevice& device):
-		MyClientRunner_I(device){
+MyClientRGBRunner::MyClientRGBRunner(	MyFreenectDevice& device,
+										MyUDPStreamer& udp_streamer):
+		MyClientRunner_I(device,udp_streamer){
 	m_window_name = "RGB";
-	SSocketConfig conf(	"10.0.0.2",
-						"10.0.0.1",
-						70777,
-						70777,
-						KINECT_FRAME_GRAY_SIZE,
-						"IR Video Img");
-	if(!m_udp_streamer.InitSocket(conf)){
-		throw Exception(
-				CV_StsBackTrace,
-				"Can't initialize streamer socket",
-				"MyClientRGBRunner::MyClientRGBRunner",
-				"MyClientRGBRunner",
-				20);
-	}
+//	SSocketConfig conf(	"10.0.0.2",
+//						"10.0.0.1",
+//						70777,
+//						70777,
+//						KINECT_FRAME_GRAY_SIZE,
+//						"IR Video Img");
+//	if(!m_udp_streamer.InitSocket(conf)){
+//		throw Exception(
+//				CV_StsBackTrace,
+//				"Can't initialize streamer socket",
+//				"MyClientRGBRunner::MyClientRGBRunner",
+//				"MyClientRGBRunner",
+//				20);
+//	}
 	namedWindow(m_window_name, CV_WINDOW_AUTOSIZE);
 	m_device.startVideo();
 	mAllocateCounter.Init("RGB send");

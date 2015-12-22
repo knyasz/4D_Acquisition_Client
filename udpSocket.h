@@ -64,14 +64,14 @@ namespace NUdpSocket
         TSDWord locPort;
         TSDWord tgtPort;
         char name[255];
-        TSDWord maxDataSize;
         TUDWord rcvBufferSize;
         TUDWord trxBufferSize;
         
         //ctor
         SSocketConfig(TString myIP,TString secIP, TSDWord aLocPort, TSDWord aTgtPort, 
-        TSDWord dataSize = KINECT_FRAME_GRAY_SIZE,TString myName = "General UDP Socket",
-        TUDWord rcvBuffSize = BUFFER_128M, TUDWord trxBuffSize = BUFFER_128M)
+        								TString myName = "General UDP Socket",
+        								TUDWord rcvBuffSize = BUFFER_128M,
+        								TUDWord trxBuffSize = BUFFER_128M)
         {
         	memset(locIP,0,MAX_NUM_CHARS);
         	memset(tgtIP,0,MAX_NUM_CHARS);
@@ -80,7 +80,6 @@ namespace NUdpSocket
             locPort = aLocPort;
             tgtPort = aTgtPort;
             strcpy(name,myName);  
-            maxDataSize = dataSize;
             rcvBufferSize = rcvBuffSize;
             trxBufferSize = trxBuffSize;
         }
@@ -92,7 +91,6 @@ namespace NUdpSocket
         	locPort = 0;
         	tgtPort = 0;
         	memset(name,0,MAX_NUM_CHARS);
-        	maxDataSize = 0;
         	rcvBufferSize = 134217728;
         	trxBufferSize = 134217728;
         }
@@ -217,9 +215,6 @@ namespace NUdpSocket
 
         //clianet address
         struct sockaddr_in m_tgtAdd;
-        
-        //meber that represent the maximum size of data
-        TUDWord m_maxDataSize;
         
         //member fd_set
         fd_set m_fdr;

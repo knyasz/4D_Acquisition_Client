@@ -9,6 +9,8 @@
 #include "Messages.h"
 #include <chrono>
 
+static const uint RETRIES_LIMIT(10);
+
 bool MyUDPStreamer::sendKinectFrameUDP(	TUByte* buffer,
 											TUDWord chunkSize,
 											const TUDWord totSize,
@@ -109,6 +111,14 @@ bool MyUDPStreamer::getFirstSyncFromHost(){
 	//we need to mult it by 1000*1000
 	//to get the number of micro seconds that we need to wait for that
 	usleep(static_cast<TUDWord>(delta*1000*1000));
+	return true;
+}
+bool MyUDPStreamer::syncClientWithHost(){
+	TUDWord numOfRetries=RETRIES_LIMIT;
+	while(getFirstSyncFromHost()) {
+		numOfRetries--;
+		return false;
+	}
 	return true;
 }
 

@@ -15,7 +15,8 @@ using namespace NUdpMessages;
 
 class MyClientDepthRunner: public virtual MyClientRunner_I {
 public:
-	MyClientDepthRunner(MyFreenectDevice& device);
+	MyClientDepthRunner(	MyFreenectDevice& device,
+							MyUDPStreamer& udp_streamer);
 	virtual ~MyClientDepthRunner();
 	virtual void AllocateAndSendFrame();
 protected:
