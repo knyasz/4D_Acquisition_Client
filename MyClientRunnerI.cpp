@@ -36,12 +36,13 @@ bool MyClientRunner_I::showAndDeallocateFrameSucessfully(){
 	Mat * frameToShow = NULL;
 	uint retries=0;
 	while(!popFromPipeSucessfully(&frameToShow)){
-//		cout<<endl<<"cant pop no "<<retries++<<endl;
-		if(retries>RETRIES_LIMIT){
-//			cout<<endl<<"Popper going to sleep"<<endl;
-			usleep(33);
-			return false;
-		}
+//		retries++;
+//		//cout<<endl<<"cant pop no "<<retries<<endl;
+//		if(retries>RETRIES_LIMIT){
+//			//cout<<endl<<"Popper going to sleep"<<endl;
+//			usleep(33);
+//			return false;
+//		}
 		pthread_yield();
 	}
 	if (!frameToShow){
@@ -66,7 +67,7 @@ bool MyClientRunner_I::showAndDeallocateFrameSucessfully(){
 	 * to process the draw requests from cv::imshow()
 	 * 1/30 = 33msec
 	 */
-//	cvWaitKey(33);
+//	cvWaitKey(33);//don't set - issues latency issues
 	cvWaitKey(1);
 	delete frameToShow;
 	mShowCounter.PrintoutEventsCounted();
