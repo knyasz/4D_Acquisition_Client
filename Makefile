@@ -43,7 +43,7 @@ endif
 
 INCLUDES  := -I/usr/local/include/libfreenect 
 LD_LIBS_LOCATION := -L/usr/local/lib
-LD_LIBS :=  -lfreenect  -lopencv_core -lopencv_highgui -lopencv_imgproc -lpthread
+LD_LIBS :=  -lfreenect  -lopencv_core -lopencv_highgui -lopencv_imgproc -lpthread -lX11
 LIBRARIES := $(LD_LIBS_LOCATION) $(LD_LIBS) \
 
 

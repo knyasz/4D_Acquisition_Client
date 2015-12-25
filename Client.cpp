@@ -9,7 +9,11 @@
 #include "MyClientDepthRunner.h"
 #include "MyClientRGBRunner.h"
 
+#include <X11/Xlib.h>//Graphic threads (XInitThreads)
+
 int main(int argc, char **argv) {
+	XInitThreads();
+
 	Freenect::Freenect freenect;
 	MyFreenectDevice& device = freenect.createDevice<MyFreenectDevice>(0);
 	MyClientRGBRunner RGB(device);
@@ -26,12 +30,12 @@ int main(int argc, char **argv) {
 	if(!Depth.showAndDeallocateFrameRun()){
 		return 1;
 	}
-//	if(!RGB.AllocateAndSendFrameRun()){
-//		return 1;
-//	}
-//	if(!RGB.showAndDeallocateFrameRun()){
-//		return 1;
-//	}
+	if(!RGB.AllocateAndSendFrameRun()){
+		return 1;
+	}
+	if(!RGB.showAndDeallocateFrameRun()){
+		return 1;
+	}
 
 
 //	while(true){
@@ -45,8 +49,8 @@ int main(int argc, char **argv) {
 
 	Depth.JoinAllocateAndSend();
 	Depth.JoinShowAndeallocate();
-//	RGB.JoinAllocateAndSend();
-//	RGB.JoinShowAndeallocate();
+	RGB.JoinAllocateAndSend();
+	RGB.JoinShowAndeallocate();
 
 	return 0;
 }
