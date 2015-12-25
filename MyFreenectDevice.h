@@ -58,7 +58,7 @@ public:
 
 	MyFreenectDevice(freenect_context *_ctx, int _index);
 	// Do not call directly even in child
-	void VideoCallback(void* _rgb, uint32_t timestamp);
+	void VideoCallback(void* _rgb,uint32_t timestamp);
 	bool getVideo(Mat& output);
 	bool getColorDist(Mat& output);
 	bool getWorldDataColor(Mat& output) ;
@@ -68,6 +68,8 @@ public:
 	bool getDepth(Mat& output);
 	bool getDepthWithDist(Mat& output);
 	bool IsDepthFrameReadyDrop();
+	bool getFilteredGrayscale(Mat& output,float minDist,float maxDist);
+	bool getGrayScale(Mat& output);
 
 	float dtmCpu(uint16* inMat, uint16* outMat, uchar minRange,uchar maxRange);
 

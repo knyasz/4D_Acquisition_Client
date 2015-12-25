@@ -49,15 +49,16 @@ void MyClientDepthRunner::AllocateAndSendFrame (){
 				"MyClientDepthRunner",
 				__LINE__);
 	}
-	pMat = new Mat(Size(640, 480), CV_16UC1);
+	pMat = new Mat(Size(640, 480), CV_8UC1);
 	uint retries=0;
-	while (!m_device.getDepth(*pMat)){
-//		cout<<endl<<"can't get Depth "<<retries++<<endl;
-		if(retries>RETRIES_LIMIT){
-			usleep(33);
-			delete pMat;
-			return;
-		}
+	while (!m_device.getFilteredGrayscale(*pMat,2.0,2.5)){
+//		retries++;
+//		//cout<<endl<<"can't get Depth "<<retries<<endl;
+//		if(retries>RETRIES_LIMIT){
+//			usleep(33);
+//			delete pMat;
+//			return;
+//		}
 		pthread_yield();;
 	}
 

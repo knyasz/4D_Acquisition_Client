@@ -83,12 +83,41 @@ bool MyFreenectDevice::getVideo(Mat& output) {
 	return result;
 }
 
-bool MyFreenectDevice::getDepth(Mat& output) {
+bool MyFreenectDevice::getGrayScale(Mat& output) {
 	bool result = false;
 	m_depth_mutex.lock();
 	if(m_new_depth_frame) {
 		depthMat.convertTo(output, CV_8UC1, 255.0/2048.0);
 		//depthMat.copyTo(output);
+		m_new_depth_frame = false;
+		result =  true;
+	}
+	m_depth_mutex.unlock();
+	return result;
+}
+bool MyFreenectDevice::getDepth(Mat& output) {
+	bool result = false;
+	m_depth_mutex.lock();
+	if(m_new_depth_frame) {
+//		depthMat.convertTo(output, CV_8UC1, 255.0/2048.0);
+		depthMat.copyTo(output);
+		m_new_depth_frame = false;
+		result =  true;
+	}
+	m_depth_mutex.unlock();
+	return result;
+}
+bool MyFreenectDevice::getFilteredGrayscale(Mat& output,float minDist,float maxDist) {
+	bool result = false;
+	m_depth_mutex.lock();
+	if(m_new_depth_frame) {
+		dtmGpu(	depthMat.data,
+				depthMat.data,
+				KINECT_COLS,
+				KINECT_ROWS,
+				minDist,
+				maxDist);
+		depthMat.convertTo(output, CV_8UC1, 255.0/2048.0);
 		m_new_depth_frame = false;
 		result =  true;
 	}
