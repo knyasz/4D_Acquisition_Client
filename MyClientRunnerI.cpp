@@ -8,7 +8,6 @@
 #include "MyClientRunnerI.h"
 
 
-
 void* MyClientRunner_I::AllocateAndSendFrameThread(void * This){
 	((MyClientRunner_I *)This)->AllocateAndSendFrameLoop();
 	return NULL;
@@ -18,11 +17,9 @@ void* MyClientRunner_I::showAndDeallocateFrameThread(void * This){
 	return NULL;
 }
 
-MyClientRunner_I::MyClientRunner_I(	MyFreenectDevice& device,
-									MyUDPStreamer& udp_streamer):
+MyClientRunner_I::MyClientRunner_I(MyFreenectDevice& device):
 	m_runner_is_initialized(false),
-	m_device(device),
-	m_udp_streamer(udp_streamer){;}
+	m_device(device){;}
 
 
 
@@ -115,5 +112,13 @@ bool MyClientRunner_I::showAndDeallocateFrameRun(){
 								showAndDeallocateFrameThread,
 								this)
 															) == 0;
+}
+bool MyClientRunner_I::syncUDPWithHost(){
+	TUDWord numOfRetries=RETRIES_LIMIT;
+	while( !m_udp_streamer.getFirstSyncFromHost()) {
+		numOfRetries--;
+		return false;
+	}
+	return true;
 }
 

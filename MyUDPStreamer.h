@@ -25,7 +25,7 @@ public:
 										TUDWord chunkSize,
 										const TUDWord totSize,
 										EOpCodesSend opCode);
-	virtual bool syncClientWithHost();
+	virtual bool getFirstSyncFromHost(	);
 
 private:
 	bool sendData(TUByte* buffer,TUDWord size) {
@@ -40,7 +40,6 @@ private:
 		}
 		return m_socket.reciveData(buffer, size, timeOut);
 	}
-	virtual bool getFirstSyncFromHost();
 private:
 	CUdpSocket m_socket;
 };
